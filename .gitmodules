@@ -1,0 +1,3 @@
+[submodule "CImg"]
+	path = CImg
+	url = https://framagit.org/dtschump/CImg.git
