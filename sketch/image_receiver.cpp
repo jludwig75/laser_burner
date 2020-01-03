@@ -48,7 +48,7 @@ struct image_piece_header_ack
 
 bool ImageReceiver::done() const
 {
-    return false;
+    return true;
 }
 
 void ImageReceiver::get_next_image_piece(ImagePiece *&piece)

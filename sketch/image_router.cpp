@@ -14,7 +14,7 @@ ImageRouter::ImageRouter(ImageReceiver *receiver, LaserBurner *burner) :
 
 void ImageRouter::run()
 {
-    while (!_receiver->done())
+    if (!_receiver->done())
     {
         ImagePiece *piece;
         _receiver->get_next_image_piece(piece);

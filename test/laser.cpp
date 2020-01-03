@@ -21,7 +21,9 @@ void Laser::burn(uint8_t intensity)
 {
     assert(intensity <= _max_intensity);
 
-    unsigned image_intensity = map(intensity, 0, _max_intensity, 0, BurnerImage::get()->max_intensity());
+    std::shared_ptr<BurnerImage> burner_image = BurnerImage::get();
 
-    BurnerImage::get()->set_value(image_intensity);
+    unsigned image_intensity = map(intensity, 0, _max_intensity, 0, burner_image->max_intensity());
+
+    burner_image->set_value(image_intensity);
 }
