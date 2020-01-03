@@ -25,7 +25,7 @@ HardwareSerial::~HardwareSerial()
 
 int HardwareSerial::begin(unsigned baud_rate)
 {
-    const char *port_name = "/dev/pts/ptmx";
+    const char *port_name = "/dev/ptmx";
     _fd = open(port_name,O_RDWR | O_NOCTTY);	/* ttyUSB0 is the FT232 based USB2SERIAL Converter   */
                                                 /* O_RDWR   - Read/Write access to serial port       */
                                                 /* O_NOCTTY - No terminal will control the process   */
