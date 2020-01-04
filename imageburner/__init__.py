@@ -1,0 +1,1 @@
+from imageburner.imageburner import ImageBurner
