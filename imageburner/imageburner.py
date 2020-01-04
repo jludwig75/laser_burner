@@ -19,7 +19,6 @@ class ImageBurner:
         self._max_dim = 150
 
     def _gen_burn_image(self, img, output_image_file_name):
-        print(img.mode)
         max_dim = max(img.size)
         # Reize to fit smaller or bigger TODO: add an option to not resize larger
         new_size = (self._max_dim * img.size[0] // max_dim, self._max_dim * img.size[1] // max_dim)

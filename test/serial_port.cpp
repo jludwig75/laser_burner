@@ -37,6 +37,7 @@ int HardwareSerial::begin(unsigned baud_rate)
     }
 
     printf("pty device name: %s\n",  ptsname(_fd));
+    fflush(stdout);
     grantpt(_fd);
     unlockpt(_fd);
 
