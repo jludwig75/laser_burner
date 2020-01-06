@@ -23,7 +23,7 @@ std::shared_ptr<BurnerImage> BurnerImage::get()
 
 BurnerImage::BurnerImage(unsigned width, unsigned height)
 {
-    _img.assign(width, height, 1, 1, 255);
+    _img.assign(width, height, 1, 1, UCHAR_MAX);
 }
 
 unsigned BurnerImage::max_intensity() const
