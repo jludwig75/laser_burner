@@ -2,8 +2,8 @@
 
 #include <signal.h>
 
-#define DEFAULT_IMAGE_WIDTH 300
-#define DEFAULT_IMAGE_HEIGHT 300
+#define DEFAULT_IMAGE_WIDTH 150
+#define DEFAULT_IMAGE_HEIGHT 150
 
 
 extern void setup();

@@ -6,21 +6,23 @@ import os
 import re
 import shlex
 import subprocess
+from PIL import Image, ImageChops
 
 sim_path = ''
 src_dir = ''
 
 class LaserBurnerSimTest(unittest.TestCase):
     TTY_RE = re.compile(r'pty device name: ([\w/]*)')
-    BURNER_OUTPUT_IMAGE = 'test_output.bmp'
     def _images_match(self, image1, image2):
-        return True
+        with Image.open(image1) as img1:
+            with Image.open(image2) as img2:
+                return True if not ImageChops.difference(img1, img2).getbbox() else False
 
-    def _start_laser_burner_sim(self):
+    def _start_laser_burner_sim(self, output_file_name):
         global sim_path
 
         # run the sim in another process
-        command = '%s %s' % (sim_path, self.BURNER_OUTPUT_IMAGE)
+        command = '%s %s' % (sim_path, output_file_name)
         p = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
         for line in p.stdout:
             line = str(line).strip()
@@ -40,11 +42,12 @@ class LaserBurnerSimTest(unittest.TestCase):
 
         INPUT_IMAGE_NAME = 'test.bmp'
         BURNER_IMAGE_NAME = 'test_gen.bmp'
+        BURNER_OUTPUT_IMAGE = 'test_output.pnm'
 
         # run the sim in another process
-        serial_device_name, p = self._start_laser_burner_sim()
+        serial_device_name, p = self._start_laser_burner_sim(BURNER_OUTPUT_IMAGE)
 
-        # run the controller script
+        # run the controller script to burn the image
         print('running controller script')
         os.system('%s %s %s -o %s' % (os.path.join(src_dir, 'burn_image.py'), serial_device_name, os.path.join(src_dir, INPUT_IMAGE_NAME), BURNER_IMAGE_NAME))
 
@@ -52,7 +55,7 @@ class LaserBurnerSimTest(unittest.TestCase):
         self._stop_laser_burner_sim(p)
 
         # compare the output images
-        self.assertTrue(self._images_match(BURNER_IMAGE_NAME, self.BURNER_OUTPUT_IMAGE))
+        self.assertTrue(self._images_match(BURNER_IMAGE_NAME, BURNER_OUTPUT_IMAGE))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Test the laser burner simulation')
