@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         loop();
     }
 
-    printf("Simulation stopped. Saving output image (BMP) as %s\n", argv[1]);
+    printf("Simulation stopped. Saving output image (PGM) as %s\n", argv[1]);
     burner_image->save(argv[1]);
 
     return 0;

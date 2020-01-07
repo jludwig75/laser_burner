@@ -12,5 +12,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     burner = ImageBurner(args.serial_device)
-    burner.init()
     burner.burn_image(args.image_file, args.output)

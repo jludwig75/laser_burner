@@ -48,7 +48,6 @@ class LaserBurnerSimTest(unittest.TestCase):
         serial_device_name, p = self._start_laser_burner_sim(BURNER_OUTPUT_IMAGE)
 
         # run the controller script to burn the image
-        print('running controller script')
         os.system('%s %s %s -o %s' % (os.path.join(src_dir, 'burn_image.py'), serial_device_name, os.path.join(src_dir, INPUT_IMAGE_NAME), BURNER_IMAGE_NAME))
 
         # stop the simulator

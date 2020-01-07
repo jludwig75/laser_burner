@@ -11,6 +11,7 @@ SerialInterface serial_ifc;
 void setup()
 {
   serial_ifc.begin(9600);
+  image_receiver.start();
 }
 
 void loop()
