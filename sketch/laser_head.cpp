@@ -19,3 +19,9 @@ void LaserHead::burn(uint8_t intensity)
 {
     _laser->burn(intensity);
 }
+
+uint16_t LaserHead::max_dim() const
+{
+    return _motors->max_dim();
+}
+

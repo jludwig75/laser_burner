@@ -4,9 +4,9 @@
 #include <assert.h>
 
 #define BITS_PER_BYTE       8
-#define ENTRIES_PER_BYTE    2
-#define BITS_PER_ENTRY      (BITS_PER_BYTE / ENTRIES_PER_BYTE)
-#define ENTRY_MASK          ((1 << BITS_PER_ENTRY) - 1)
+#define ENTRIES_PER_BYTE    1
+// #define BITS_PER_ENTRY      (BITS_PER_BYTE / ENTRIES_PER_BYTE)
+// #define ENTRY_MASK          ((1 << BITS_PER_ENTRY) - 1)
 
 // All data is encoded by rows (x)
 
@@ -55,25 +55,26 @@ uint8_t ImagePiece::get_entry_byte(uint16_t x, uint16_t y) const
     return linear_entry / ENTRIES_PER_BYTE;
 }
 
-uint8_t ImagePiece::get_entry_nibble(uint16_t x, uint16_t y) const
-{
-    uint16_t linear_entry = x * width() + y;
-    return linear_entry % ENTRIES_PER_BYTE;
-}
+// uint8_t ImagePiece::get_entry_nibble(uint16_t x, uint16_t y) const
+// {
+//     uint16_t linear_entry = x * width() + y;
+//     return linear_entry % ENTRIES_PER_BYTE;
+// }
 
 uint8_t ImagePiece::get_x_y_intensity(uint16_t x, uint16_t y) const
 {
     uint16_t entry_byte = get_entry_byte(x, y);
-    uint16_t entry_nibble = get_entry_nibble(x, y);
+    // uint16_t entry_nibble = get_entry_nibble(x, y);
 
     uint8_t byte = _image_data[entry_byte];
-    if (entry_nibble == 0)
-    {
-        return byte & ENTRY_MASK;
-    }
-    else
-    {
-        assert(entry_nibble == 1);
-        return byte >> BITS_PER_ENTRY;
-    }
+    // if (entry_nibble == 0)
+    // {
+    //     return byte & ENTRY_MASK;
+    // }
+    // else
+    // {
+    //     assert(entry_nibble == 1);
+    //     return byte >> BITS_PER_ENTRY;
+    // }
+    return byte;
 }

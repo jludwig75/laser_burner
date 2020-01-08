@@ -14,6 +14,7 @@ add_executable(laser_burner_sim
                 test/serial_interface.cpp
                 test/burner_image.cpp
 
+                sketch/burner_protocol_handler.cpp
                 sketch/image_piece.cpp
                 sketch/image_receiver.cpp
                 sketch/image_router.cpp

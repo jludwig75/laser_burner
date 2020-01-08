@@ -15,7 +15,7 @@ public:
     uint8_t get_x_y_intensity(uint16_t x, uint16_t y) const;
 private:
     uint8_t get_entry_byte(uint16_t x, uint16_t y) const;
-    uint8_t get_entry_nibble(uint16_t x, uint16_t y) const;
+    // uint8_t get_entry_nibble(uint16_t x, uint16_t y) const;
     uint16_t _start_x;
     uint16_t _start_y;
     uint16_t _width;

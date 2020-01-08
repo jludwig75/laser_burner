@@ -4,7 +4,8 @@
 #include "laser_head.h"
 
 
-LaserBurner::LaserBurner()
+LaserBurner::LaserBurner(LaserHead *head) :
+    _laser_head(head)
 {
 }
 
@@ -22,4 +23,9 @@ void LaserBurner::burn_image_piece(const ImagePiece *piece)
             }
         }
     }
+}
+
+uint16_t LaserBurner::max_dim() const
+{
+    return _laser_head->max_dim();
 }
