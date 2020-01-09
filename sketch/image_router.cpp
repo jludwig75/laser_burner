@@ -12,4 +12,6 @@ ImageRouter::ImageRouter(LaserBurner *burner) :
 
 void ImageRouter::route_image_piece(const ImagePiece *piece)
 {
+    // TODO: Image router no longer necessary. Just call burner directly from image receiver.
+    _burner->burn_image_piece(piece);
 }
