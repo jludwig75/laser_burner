@@ -35,6 +35,32 @@ static Op to_ack_op_code(uint16_t opcode)
     }
 }
 
+static AckStatus to_ack_status(uint16_t status)
+{
+    switch(status)
+    {
+    case ACK_SATUS_SUCCESS:
+        return ACK_SATUS_SUCCESS;
+    case ACK_SATUS_BAD_MAGIC:
+        return ACK_SATUS_BAD_MAGIC;
+    case ACK_SATUS_INVALID_REQUEST_OP:
+        return ACK_SATUS_INVALID_REQUEST_OP;
+    case ACK_SATUS_INVALID_REQUEST:
+        return ACK_SATUS_INVALID_REQUEST;
+    case ACK_SATUS_INVALID_PARAMETER:
+        return ACK_SATUS_INVALID_PARAMETER;
+    case ACK_SATUS_NOT_IMPLEMENTED:
+        return ACK_SATUS_NOT_IMPLEMENTED;
+    case ACK_STATUS_IO_ERROR:
+        return ACK_STATUS_IO_ERROR;
+    case ACK_STATUS_INVALID_BURNER_STATE:
+        return ACK_STATUS_INVALID_BURNER_STATE;
+    case ACK_STATUS_UNKOWN_ERROR:
+    default:
+        return ACK_STATUS_UNKOWN_ERROR;
+    }
+}
+
 
 BurnerProtocolHandler::BurnerProtocolHandler(SerialInterface *serial) :
     _serial(serial),
@@ -83,6 +109,7 @@ void BurnerProtocolHandler::on_loop()
         handle_inquiry_request(&header);
         break;
     case START_PIECE_REQ_OP:
+        handle_start_piece_request(&header);
         break;
     case IMG_DATA_REQ_OP:
         break;
@@ -95,42 +122,100 @@ void BurnerProtocolHandler::on_loop()
 
 void BurnerProtocolHandler::handle_inquiry_request(const req_header *header)
 {
+    Op ack_op = INQUIRY_ACK_OP;
     inquiry_req req;
 
     if (!receive_remaining_req_data(header, &req, sizeof(req)))
     {
-        LOG("I/O error receiving remainger of inquiry request.\n");
-        return_failure_ack(INQUIRY_REQ_OP, ACK_STATUS_IO_ERROR);
-        return; // TODO: Send an ack
+        LOG("I/O error receiving remainder of inquiry request.\n");
+        return_failure_ack(ack_op, ACK_STATUS_IO_ERROR);
+        return;
     }
 
     req.deswizzle();
     if (!req.validate())
     {
         LOG("Invalid inquiry request received.\n");
-        return_failure_ack(INQUIRY_REQ_OP, ACK_SATUS_INVALID_REQUEST);
-        return; // TODO: Send an ack
+        return_failure_ack(ack_op, ACK_SATUS_INVALID_REQUEST);
+        return;
     }
 
     uint16_t rx_buffer_size;
     uint16_t max_dim;
-    uint16_t status = _client->handle_inquiry(&rx_buffer_size, &max_dim);
+    AckStatus status = _client->handle_inquiry(&rx_buffer_size, &max_dim);
 
-    // Send the register ack
+    if (status != ACK_SATUS_SUCCESS)
+    {
+        LOG("Inquiry operation failed\n");
+        return_failure_ack(ack_op, status);
+        return;
+    }
+
+    // Send the inquiry ack
     inquiry_ack ack(rx_buffer_size, max_dim);
     ack.swizzle();
     size_t bytes_sent = _serial->writeBytes(reinterpret_cast<const uint8_t *>(&ack), sizeof(ack));
     if (bytes_sent != sizeof(ack))
     {
-        LOG("I/O error sending registration ACK. Restarting...\n");
+        LOG("I/O error sending inquiry ACK. Restarting...\n");
         // Can't really know how to handle this. Don't know if the request was sent or not.
         // TODO: Should we try to send a failure? For now, yes
-        return_failure_ack(INQUIRY_REQ_OP, ACK_STATUS_IO_ERROR);
+        return_failure_ack(ack_op, ACK_STATUS_IO_ERROR);
         return;
     }
 
-    // registration complete
-    LOG("Registration complete.\n");
+    // inquiry complete
+    LOG("Inquiry operation complete.\n");
+}
+
+void BurnerProtocolHandler::handle_start_piece_request(const req_header *header)
+{
+    Op ack_op = START_PIECE_ACK_OP;
+    assert(_client != NULL);
+
+    start_piece_req req;
+    if (!receive_remaining_req_data(header, &req, sizeof(req)))
+    {
+        LOG("I/O error receiving remainder of start piece request.\n");
+        return_failure_ack(ack_op, ACK_STATUS_IO_ERROR);
+        return;
+    }
+
+    req.deswizzle();
+    if (!req.validate(_client->max_dim()))
+    {
+        LOG("Invalid start piece request received.\n");
+        return_failure_ack(ack_op, ACK_SATUS_INVALID_REQUEST);
+        return;
+    }
+
+    AckStatus status = _client->handle_start_piece(req.image_piece.start_x,
+                                                   req.image_piece.start_y,
+                                                   req.image_piece.width,
+                                                   req.image_piece.height,
+                                                   req.image_piece.image_data_crc);
+    if (status != ACK_SATUS_SUCCESS)
+    {
+        LOG("Start piece operation failed\n");
+        return_failure_ack(ack_op, status);
+        return;
+    }
+
+    // Send the start piece ack
+    start_piece_ack ack;
+    ack.swizzle();
+    size_t bytes_sent = _serial->writeBytes(reinterpret_cast<const uint8_t *>(&ack), sizeof(ack));
+    if (bytes_sent != sizeof(ack))
+    {
+        LOG("I/O error sending start piece ACK. Restarting...\n");
+        // Can't really know how to handle this. Don't know if the request was sent or not.
+        // TODO: Should we try to send a failure? For now, yes
+        return_failure_ack(ack_op, ACK_STATUS_IO_ERROR);
+        return;
+    }
+
+    // start piece complete
+    LOG("Start piece operation complete.\n");
 }
 
 

@@ -26,10 +26,10 @@ public:
                                              uint16_t start_y,
                                              uint16_t width,
                                              uint16_t height,
-                                             uint16_t header_crc,
                                              uint16_t image_data_crc) = 0;
         virtual AckStatus handle_image_data(const uint8_t *image_bytes,
                                             uint16_t num_bytes) = 0;
+        virtual uint16_t max_dim() const = 0;
     };
     void register_client(ProtocolHandlerClient *client);
     void complete_image_piece(AckStatus status);
@@ -38,6 +38,7 @@ private:
     bool receive_remaining_req_data(const req_header *header, void *req, uint16_t full_req_size);
 
     void handle_inquiry_request(const req_header *header);
+    void handle_start_piece_request(const req_header *header);
     void return_failure_ack(Op opcode, AckStatus status);
 
     SerialInterface *_serial;

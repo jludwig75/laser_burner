@@ -53,7 +53,8 @@ enum AckStatus
     ACK_SATUS_INVALID_PARAMETER = 4,
     ACK_SATUS_NOT_IMPLEMENTED = 5,
     ACK_STATUS_IO_ERROR = 6,
-    ACK_STATUS_INVALID_BURNER_STATE = 7
+    ACK_STATUS_INVALID_BURNER_STATE = 7,
+    ACK_STATUS_UNKOWN_ERROR = 8
 };
 
 struct __attribute__((packed)) req_header
@@ -139,6 +140,11 @@ struct __attribute__((packed)) image_piece_header
     }
     bool validate(uint16_t max_dim)
     {
+        if (start_x + width > max_dim || start_y + height > max_dim)
+        {
+            return false;
+        }
+        // TODO: check header CRC
         return true;
     }
 };
@@ -169,7 +175,7 @@ struct __attribute__((packed)) start_piece_req : public req_header
 
 struct __attribute__((packed)) start_piece_ack : public ack_header
 {
-    start_piece_ack(AckStatus status) :
+    start_piece_ack() :
         ack_header(START_PIECE_ACK_OP, ACK_SATUS_SUCCESS)
     {
     }

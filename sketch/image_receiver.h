@@ -19,10 +19,10 @@ public:
                                          uint16_t start_y,
                                          uint16_t width,
                                          uint16_t height,
-                                         uint16_t header_crc,
                                          uint16_t image_data_crc);
     virtual AckStatus handle_image_data(const uint8_t *image_bytes,
                                         uint16_t num_bytes);
+    virtual uint16_t max_dim() const;
 
 
     // void start();
