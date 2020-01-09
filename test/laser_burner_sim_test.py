@@ -6,6 +6,8 @@ import os
 import re
 import shlex
 import subprocess
+import time
+import signal
 from PIL import Image, ImageChops
 
 sim_path = ''
@@ -34,8 +36,16 @@ class LaserBurnerSimTest(unittest.TestCase):
 
     def _stop_laser_burner_sim(self, p):
         p.stdout.close()
-        p.send_signal(2)
+        # Send SIGINT to save the image file
+        p.send_signal(signal.SIGINT)
+        # Wait for the image to be saved
+        time.sleep(1)
+        # send SIGKILL to make sure it dies
+        p.send_signal(signal.SIGKILL)
         p.wait()
+
+    def setUp(self):
+        os.system('rm *.pgm')
 
     def test_burn_simple_bmp(self):
         global src_dir

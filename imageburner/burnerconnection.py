@@ -23,20 +23,32 @@ ACK_SATUS_NOT_IMPLEMENTED = 5
 ACK_STATUS_IO_ERROR = 6
 
 
-class InquiryAck:
+class Ack:
     def __init__(self, serial):
         self._serial = serial
 
     def receive(self):
-        bytes = bytearray(8)
-        bytes = self._serial.read(len(bytes))
+        bytes = self._serial.read(6)
         if bytes[0] != BURNER_MAGIC[0] or bytes[1] != BURNER_MAGIC[1]:
             raise Exception('Bad burner magic')
         op = (bytes[2] << 8) | bytes[3]
+        status = (bytes[4] << 8) | bytes[5]
+        return (op, status)
+
+class InquiryAck(Ack):
+    def __init__(self, serial):
+        Ack.__init__(self, serial)
+        self._serial = serial
+
+    def receive(self):
+        op, status = Ack.receive(self)
         if op != INQUIRY_ACK_OP:
             raise Exception('Expected inquiry op (%u), got op %u' % (INQUIRY_ACK_OP, op))
-        self.rx_buffer_size = (bytes[4] << 8) | bytes[5]
-        self.max_dim = (bytes[6] << 8) | bytes[7]
+        if status != ACK_SATUS_SUCCESS:
+            raise Exception('Failed inquiry ACK: error status %u' % status)
+        bytes = self._serial.read(4)
+        self.rx_buffer_size = (bytes[0] << 8) | bytes[1]
+        self.max_dim = (bytes[2] << 8) | bytes[3]
 
 class InquiryReq:
     def __init__(self, serial):
@@ -71,7 +83,7 @@ class BurnerConnection:
         reg_request = InquiryReq(self._serial)
         # 2. Get inquiry response (device RX buffer size, max dimension)
         ack = reg_request.send()
-        print('Successfully iquiried burner parameters')
+        print('Successfully iquiried burner parameters: rx_buffer_size=%u, max_dim=%u' % (ack.rx_buffer_size, ack.max_dim))
         self._rx_buffer_size = ack.rx_buffer_size
         self._max_dim = ack.max_dim
 

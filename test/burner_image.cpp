@@ -5,11 +5,11 @@
 
 std::shared_ptr<BurnerImage> BurnerImage::_the_image;
 
-std::shared_ptr<BurnerImage> BurnerImage::create(unsigned width, unsigned height)
+std::shared_ptr<BurnerImage> BurnerImage::create(const std::string & image_file_name, unsigned width, unsigned height)
 {
     assert(!_the_image);
 
-    _the_image = std::shared_ptr<BurnerImage>(new BurnerImage(width, height));
+    _the_image = std::shared_ptr<BurnerImage>(new BurnerImage(image_file_name, width, height));
 
     return _the_image;
 }
@@ -21,7 +21,8 @@ std::shared_ptr<BurnerImage> BurnerImage::get()
     return _the_image;
 }
 
-BurnerImage::BurnerImage(unsigned width, unsigned height)
+BurnerImage::BurnerImage(const std::string & image_file_name, unsigned width, unsigned height) :
+    _image_file_name(image_file_name)
 {
     _img.assign(width, height, 1, 1, UCHAR_MAX);
 }
@@ -56,7 +57,7 @@ void BurnerImage::set_value(unsigned value)
     _img.atXY(_x, _y) = value;
 }
 
-void BurnerImage::save(const char *file_name)
+void BurnerImage::save()
 {
-    _img.save_pnm(file_name);
+    _img.save_pnm(_image_file_name.c_str());
 }

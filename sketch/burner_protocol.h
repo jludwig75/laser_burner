@@ -76,7 +76,7 @@ struct __attribute__((packed)) ack_header
     uint16_t magic;
     uint16_t op;
     uint16_t status;
-    ack_header(Op opcode, AckStatus status = ACK_SATUS_SUCCESS) :
+    ack_header(Op opcode, AckStatus status) :
         magic(BURNER_MAGIC),
         op(opcode),
         status(status)
@@ -107,7 +107,7 @@ struct __attribute__((packed)) inquiry_ack : public ack_header
     uint16_t rx_buffer_size;
     uint16_t max_dim;
     inquiry_ack(uint16_t rx_buffer_size, uint16_t max_dim) :
-        ack_header(INQUIRY_ACK_OP),
+        ack_header(INQUIRY_ACK_OP, ACK_SATUS_SUCCESS),
         rx_buffer_size(rx_buffer_size),
         max_dim(max_dim)
     {
@@ -169,8 +169,8 @@ struct __attribute__((packed)) start_piece_req : public req_header
 
 struct __attribute__((packed)) start_piece_ack : public ack_header
 {
-    start_piece_ack() :
-        ack_header(START_PIECE_ACK_OP)
+    start_piece_ack(AckStatus status) :
+        ack_header(START_PIECE_ACK_OP, ACK_SATUS_SUCCESS)
     {
     }
 };

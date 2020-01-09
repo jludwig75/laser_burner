@@ -12,8 +12,14 @@ extern void loop();
 
 volatile bool run_loop = true;
 
+std::shared_ptr<BurnerImage> g_burner_image;
+
 void ctrl_c_hnalder(int sig)
 {
+    if (g_burner_image)
+    {
+        g_burner_image->save();
+    }
     run_loop = false;
 }
 
@@ -44,7 +50,7 @@ int main(int argc, char *argv[])
 
     signal(SIGINT, ctrl_c_hnalder); 
 
-    std::shared_ptr<BurnerImage> burner_image = BurnerImage::create(DEFAULT_IMAGE_WIDTH, DEFAULT_IMAGE_HEIGHT);
+    g_burner_image = BurnerImage::create(argv[1], DEFAULT_IMAGE_WIDTH, DEFAULT_IMAGE_HEIGHT);
 
     printf("Simulation running. Press Ctrl-C to stop and generate output image.\n");
 
@@ -53,9 +59,6 @@ int main(int argc, char *argv[])
     {
         loop();
     }
-
-    printf("Simulation stopped. Saving output image (PGM) as %s\n", argv[1]);
-    burner_image->save(argv[1]);
 
     return 0;
 }
