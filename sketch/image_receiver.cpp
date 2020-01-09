@@ -2,6 +2,8 @@
 
 #include "serial_interface.h"
 #include "burner_protocol.h"
+#include "image_router.h"
+#include "image_piece.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -10,8 +12,9 @@
 #define delay   usleep
 
 
-ImageReceiver::ImageReceiver(SerialInterface *serial, uint16_t max_dim) :
+ImageReceiver::ImageReceiver(SerialInterface *serial, ImageRouter *image_router, uint16_t max_dim) :
     _serial(serial),
+    _image_router(image_router),
     _protocol_handler(serial),
     _max_dim(max_dim),
     _state(Ready)
@@ -86,13 +89,15 @@ AckStatus ImageReceiver::handle_image_data(const uint8_t *image_bytes,
     assert(_piece_state.is_set());
 
     // 1. Construct an image piece with the state data
+    ImagePiece piece(_piece_state.start_x, _piece_state.start_y, _piece_state.width, _piece_state.height);
 
     // 2. Receive the image data from the serial interface
 
-    // 3. Send the image piece to the image router
-
-    // 4. Verify the image data CRC
+    // 3. Verify the image data CRC
     
+    // 4. Send the image piece to the image router
+    _image_router->route_image_piece(&piece);
+
     // 5. Reset the state to Ready
     _state = Ready;
 

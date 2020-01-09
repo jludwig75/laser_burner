@@ -15,8 +15,8 @@ Laser laser(MAX_BURN_TIME_MS, MAX_INTENSITY);
 LaserHead laser_head(&motors, &laser);
 LaserBurner laser_burner(&laser_head);
 SerialInterface serial_ifc;
-ImageReceiver image_receiver(&serial_ifc, laser_burner.max_dim());
-ImageRouter rotuer(&image_receiver, &laser_burner);
+ImageRouter rotuer(&laser_burner);
+ImageReceiver image_receiver(&serial_ifc, &rotuer, laser_burner.max_dim());
 
 void setup()
 {
@@ -25,5 +25,5 @@ void setup()
 
 void loop()
 {
-    rotuer.on_loop();
+    image_receiver.on_loop();
 }

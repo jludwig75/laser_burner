@@ -7,11 +7,12 @@
 
 class ImagePiece;
 class SerialInterface;
+class ImageRouter;
 
 class ImageReceiver : public BurnerProtocolHandler::ProtocolHandlerClient
 {
 public:
-    ImageReceiver(SerialInterface *serial, uint16_t max_dim);
+    ImageReceiver(SerialInterface *serial, ImageRouter *image_router, uint16_t max_dim);
     void on_loop();
     virtual AckStatus handle_inquiry(uint16_t *rx_buffer_size,
                                      uint16_t *max_dim);
@@ -48,6 +49,7 @@ private:
         uint16_t image_data_crc;
     } _piece_state;
     SerialInterface *_serial;
+    ImageRouter *_image_router;
     BurnerProtocolHandler _protocol_handler;
     uint16_t _max_dim;
     State _state;

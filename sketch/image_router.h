@@ -1,16 +1,14 @@
 #pragma once
 
-
-class ImageReceiver;
 class LaserBurner;
+class ImagePiece;
 
 
 class ImageRouter
 {
 public:
-    ImageRouter(ImageReceiver *receiver, LaserBurner *burner);
-    void on_loop();
+    ImageRouter(LaserBurner *burner);
+    void route_image_piece(const ImagePiece *piece);
 private:
-    ImageReceiver *_receiver;
     LaserBurner *_burner;
 };
