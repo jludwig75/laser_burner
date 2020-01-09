@@ -21,16 +21,35 @@ public:
                                          uint16_t height,
                                          uint16_t image_data_crc);
     virtual AckStatus handle_image_data(const uint8_t *image_bytes,
-                                        uint16_t num_bytes);
+                                        uint16_t num_bytes,
+                                        SerialInterface *serial);
     virtual uint16_t max_dim() const;
-
-
-    // void start();
-    // bool done() const;
-    // void get_next_image_piece(ImagePiece *&piece);
-    // void last_piece_complete();
 private:
+    enum State {Ready, ReadyWaitingForImageData};
+    struct PieceState
+    {
+        PieceState() :
+            start_x(UINT16_MAX),
+            start_y(UINT16_MAX),
+            width(UINT16_MAX),
+            height(UINT16_MAX),
+            image_data_crc(0)
+        {
+        }
+        bool is_set() const{
+            return start_x != UINT16_MAX &&
+                    start_y != UINT16_MAX &&
+                    width != UINT16_MAX &&
+                    height != UINT16_MAX;
+        }
+        uint16_t start_x;
+        uint16_t start_y;
+        uint16_t width;
+        uint16_t height;
+        uint16_t image_data_crc;
+    } _piece_state;
     SerialInterface *_serial;
     BurnerProtocolHandler _protocol_handler;
     uint16_t _max_dim;
+    State _state;
 };
