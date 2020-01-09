@@ -138,12 +138,13 @@ struct __attribute__((packed)) image_piece_header
         header_crc = ntohs(header_crc);
         image_data_crc = ntohs(image_data_crc);
     }
-    bool validate(uint16_t max_dim)
+    bool validate()
     {
-        if (start_x + width > max_dim || start_y + height > max_dim)
+        if (width == 0 || height == 0)
         {
             return false;
         }
+
         // TODO: check header CRC
         return true;
     }
@@ -152,7 +153,7 @@ struct __attribute__((packed)) image_piece_header
 struct __attribute__((packed)) start_piece_req : public req_header
 {
     image_piece_header image_piece;
-    bool validate(uint16_t max_dim)
+    bool validate()
     {
         if (!req_header::validate())
         {
@@ -164,7 +165,7 @@ struct __attribute__((packed)) start_piece_req : public req_header
             return false;
         }
 
-        return image_piece.validate(max_dim);
+        return image_piece.validate();
     }
     void deswizzle()
     {

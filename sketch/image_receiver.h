@@ -23,7 +23,6 @@ public:
     virtual AckStatus handle_image_data(const uint8_t *image_bytes,
                                         uint16_t num_bytes,
                                         SerialInterface *serial);
-    virtual uint16_t max_dim() const;
 private:
     enum State {Ready, ReadyWaitingForImageData};
     struct PieceState

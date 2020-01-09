@@ -182,7 +182,7 @@ void BurnerProtocolHandler::handle_start_piece_request(const req_header *header)
     }
 
     req.deswizzle();
-    if (!req.validate(_client->max_dim()))
+    if (!req.validate())
     {
         LOG("Invalid start piece request received.\n");
         return_failure_ack(ack_op, ACK_SATUS_INVALID_REQUEST);

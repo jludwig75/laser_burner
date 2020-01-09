@@ -56,6 +56,12 @@ AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
         return ACK_STATUS_INVALID_BURNER_STATE;
     }
 
+    // Validate parameters
+    if (width == 0 || height == 0 || start_x + width > _max_dim || start_y + height > _max_dim)
+    {
+        return ACK_SATUS_INVALID_PARAMETER;
+    }
+
     _piece_state.start_x = start_x;
     _piece_state.start_y = start_y;
     _piece_state.width = width;
@@ -92,9 +98,4 @@ AckStatus ImageReceiver::handle_image_data(const uint8_t *image_bytes,
 
     // 6. Return success when done.
     return ACK_SATUS_NOT_IMPLEMENTED;
-}
-
-uint16_t ImageReceiver::max_dim() const
-{
-    return _max_dim;
 }
