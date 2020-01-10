@@ -1,6 +1,7 @@
 #pragma once
 
 #include "burner_protocol_handler.h"
+#include "image_piece.h"
 
 #include <stdint.h>
 
@@ -23,7 +24,8 @@ public:
                                          uint16_t image_data_crc);
     virtual AckStatus handle_image_data(const uint8_t *image_bytes,
                                         uint16_t num_bytes,
-                                        SerialInterface *serial);
+                                        SerialInterface *serial,
+                                        bool *complete);
 private:
     enum State {Ready, ReadyWaitingForImageData};
     struct PieceState
@@ -53,4 +55,5 @@ private:
     BurnerProtocolHandler _protocol_handler;
     uint16_t _max_dim;
     State _state;
+    ImagePiece _piece;
 };

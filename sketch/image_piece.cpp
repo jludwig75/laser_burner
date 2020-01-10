@@ -15,18 +15,21 @@ ImagePiece::ImagePiece() :
     _start_y(0),
     _width(0),
     _height(0),
-    _image_data(NULL)
-
+    _current_index(0)
 {
 }
 
-ImagePiece::ImagePiece(uint16_t start_x, uint16_t start_y, uint16_t width, uint16_t height) :
-    _start_x(start_x),
-    _start_y(start_y),
-    _width(width),
-    _height(height),
-    _image_data(NULL)
+bool ImagePiece::init(uint16_t start_x, uint16_t start_y, uint16_t width, uint16_t height)
 {
+    if (width * height > MAX_PIECE_BYTES)
+    {
+        return false;
+    }
+    _start_x = start_x;
+    _start_y = start_y;
+    _width = width;
+    _height = height;
+    _current_index = 0;
 }
 
 uint16_t ImagePiece::start_x() const
@@ -77,4 +80,50 @@ uint8_t ImagePiece::get_x_y_intensity(uint16_t x, uint16_t y) const
     //     return byte >> BITS_PER_ENTRY;
     // }
     return byte;
+}
+
+uint16_t ImagePiece::total_bytes() const
+{
+    return _width * _height;
+}
+
+bool ImagePiece::is_complete() const
+{
+    assert(_current_index <= total_bytes());
+
+    return _current_index == total_bytes();
+}
+
+uint16_t ImagePiece::rx_buffer_bytes_remaining() const
+{
+    return total_bytes() - _current_index;
+}
+
+uint8_t *ImagePiece::get_data_rx_buffer(uint16_t bytes_to_add)
+{
+    if (is_complete())
+    {
+        return NULL;
+    }
+
+    if (_current_index + bytes_to_add > total_bytes())
+    {
+        return NULL;
+    }
+
+    return &_image_data[_current_index];
+}
+
+bool ImagePiece::report_bytes_added_to_rx_buffer(uint16_t bytes_added)
+{
+    // Caller overflowed the buffer
+    assert(_current_index + bytes_added <= total_bytes());
+
+    if (_current_index + bytes_added > total_bytes())
+    {
+        _current_index = total_bytes();
+        return false;
+    }
+
+    _current_index += bytes_added;
 }

@@ -72,12 +72,19 @@ AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
     _piece_state.image_data_crc = image_data_crc;
     _state = ReadyWaitingForImageData;
 
+    // 1. Construct an image piece with the state data
+    if (!_piece.init(_piece_state.start_x, _piece_state.start_y, _piece_state.width, _piece_state.height))
+    {
+        return ACK_SATUS_IMAGE_PIECE_TOO_BIG;
+    }
+
     return ACK_SATUS_SUCCESS;
 }
 
 AckStatus ImageReceiver::handle_image_data(const uint8_t *image_bytes,
                                            uint16_t num_bytes,
-                                           SerialInterface *serial)
+                                           SerialInterface *serial,
+                                           bool *complete)
 {
     if (_state != ReadyWaitingForImageData)
     {
@@ -88,18 +95,49 @@ AckStatus ImageReceiver::handle_image_data(const uint8_t *image_bytes,
     // Has to be set if state is ReadyWaitingForImageData
     assert(_piece_state.is_set());
 
-    // 1. Construct an image piece with the state data
-    ImagePiece piece(_piece_state.start_x, _piece_state.start_y, _piece_state.width, _piece_state.height);
+    // 2. Validate the image data size
+    uint16_t max_rx_bytes = _piece.rx_buffer_bytes_remaining();
+    if (num_bytes > max_rx_bytes)
+    {
+        return ACK_SATUS_RX_BUFFER_OVERFLOW;
+    }
 
-    // 2. Receive the image data from the serial interface
+    // 3. Receive the image data from the serial interface
+    uint8_t *rx_buffer = _piece.get_data_rx_buffer(num_bytes);
+    if (!rx_buffer)
+    {
+        return ACK_SATUS_RX_BUFFER_OVERFLOW;
+    }
 
-    // 3. Verify the image data CRC
+    size_t total_bytes_received = 0;
+    while (total_bytes_received < num_bytes)    // TODO: Add timeout
+    {
+        size_t bytes_received = serial->readBytes(rx_buffer, num_bytes);
+        if (bytes_received == 0)
+        {
+            return ACK_STATUS_IO_ERROR;
+        }
+
+        total_bytes_received += bytes_received;
+    }
+
+    // 4. Verify the image data CRC
     
-    // 4. Send the image piece to the image router
-    _image_router->route_image_piece(&piece);
+    // 5. Send the image piece to the image router
+    if (_piece.is_complete())
+    {
+        _image_router->route_image_piece(&_piece);
+        // 5. Reset the state to Ready
+        _state = Ready;
 
-    // 5. Reset the state to Ready
-    _state = Ready;
+        // 6. Send the complete piece ack TODO: This won't work. It has to be sent after the ACK for this request.
+        *complete = true;
+    }
+    else
+    {
+        *complete = false;
+    }
+    
 
     // 6. Return success when done.
     return ACK_SATUS_NOT_IMPLEMENTED;

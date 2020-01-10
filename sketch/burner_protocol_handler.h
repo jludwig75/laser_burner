@@ -29,7 +29,8 @@ public:
                                              uint16_t image_data_crc) = 0;
         virtual AckStatus handle_image_data(const uint8_t *image_bytes,
                                             uint16_t num_bytes,
-                                            SerialInterface *serial) = 0;
+                                            SerialInterface *serial,
+                                            bool *complete) = 0;
     };
     void register_client(ProtocolHandlerClient *client);
     void complete_image_piece(AckStatus status);

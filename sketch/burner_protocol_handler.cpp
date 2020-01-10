@@ -28,8 +28,6 @@ static Op to_ack_op_code(uint16_t opcode)
         return IMG_DATA_REQ_OP;
     case IMG_DATA_ACK_OP:
         return IMG_DATA_ACK_OP;
-    case COMPLETE_PIECE_ACK_OP:
-        return COMPLETE_PIECE_ACK_OP;
     default:
         return UNKNOWN_OP;
     }

@@ -26,8 +26,6 @@ Controller                Burner
   |                         |
   |<-- image data ack    ---|   Repeat until all data specified in header has been sent
   |                         |
-  |<-- image piece ack   ---|   Success or failure based on data received without timeout and matching CRC
-  |                         |
 */
 
 #define BURNER_MAGIC    0x4652 // 'FR' big endian
@@ -40,8 +38,7 @@ enum Op
     START_PIECE_REQ_OP = 3,
     START_PIECE_ACK_OP = 4,
     IMG_DATA_REQ_OP = 5,
-    IMG_DATA_ACK_OP = 6,
-    COMPLETE_PIECE_ACK_OP = 7
+    IMG_DATA_ACK_OP = 6
 };
 
 enum AckStatus
@@ -54,7 +51,9 @@ enum AckStatus
     ACK_SATUS_NOT_IMPLEMENTED = 5,
     ACK_STATUS_IO_ERROR = 6,
     ACK_STATUS_INVALID_BURNER_STATE = 7,
-    ACK_STATUS_UNKOWN_ERROR = 8
+    ACK_STATUS_UNKOWN_ERROR = 8,
+    ACK_SATUS_IMAGE_PIECE_TOO_BIG = 9,
+    ACK_SATUS_RX_BUFFER_OVERFLOW = 10
 };
 
 struct __attribute__((packed)) req_header
@@ -178,6 +177,22 @@ struct __attribute__((packed)) start_piece_ack : public ack_header
 {
     start_piece_ack() :
         ack_header(START_PIECE_ACK_OP, ACK_SATUS_SUCCESS)
+    {
+    }
+};
+
+struct __attribute__((packed)) image_data_req : public req_header
+{
+    uint16_t number_of_bytes;   // number of image bytes following this reqeust
+    uint16_t image_data_crc;    // CRC of image data beingsent
+};
+
+struct __attribute__((packed)) image_data_ack : public ack_header
+{
+    uint8_t complete;
+    image_data_ack(bool complete) :
+        ack_header(IMG_DATA_ACK_OP, ACK_SATUS_SUCCESS),
+        complete(complete ? 1: 0)
     {
     }
 };
