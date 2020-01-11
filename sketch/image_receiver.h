@@ -22,8 +22,8 @@ public:
                                          uint16_t width,
                                          uint16_t height,
                                          uint16_t image_data_crc);
-    virtual AckStatus handle_image_data(const uint8_t *image_bytes,
-                                        uint16_t num_bytes,
+    virtual AckStatus handle_image_data(uint16_t num_bytes,
+                                        uint16_t image_data_crc,
                                         SerialInterface *serial,
                                         bool *complete);
 private:

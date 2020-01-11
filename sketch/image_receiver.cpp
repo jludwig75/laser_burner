@@ -12,6 +12,45 @@
 #define delay   usleep
 
 
+#define POLY 0x8408
+
+static uint16_t crc16(const uint8_t *data_p, uint16_t length)
+{
+    uint16_t i;
+    uint32_t data;
+    uint32_t crc = 0xffff;
+
+    if (length == 0)
+    {    
+        return static_cast<uint16_t>(~crc);
+    }
+
+    do
+    {
+        for (i=0, data=(uint32_t)0xff & *data_p++;
+                i < 8; 
+                i++, data >>= 1)
+        {
+            if (((crc & 0x0001) ^ (data & 0x0001)) != 0)
+            {
+                crc = (crc >> 1) ^ POLY;
+            }
+            else
+            {
+                crc >>= 1;
+            }
+        }
+    }
+    while (--length > 0);
+
+    crc = ~crc;
+    data = crc;
+    crc = (crc << 8) | (data >> 8 & 0xff);
+
+    return static_cast<uint16_t>(crc);
+}
+
+
 ImageReceiver::ImageReceiver(SerialInterface *serial, ImageRouter *image_router, uint16_t max_dim) :
     _serial(serial),
     _image_router(image_router),
@@ -81,8 +120,8 @@ AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
     return ACK_SATUS_SUCCESS;
 }
 
-AckStatus ImageReceiver::handle_image_data(const uint8_t *image_bytes,
-                                           uint16_t num_bytes,
+AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
+                                           uint16_t image_data_crc,
                                            SerialInterface *serial,
                                            bool *complete)
 {
@@ -122,6 +161,11 @@ AckStatus ImageReceiver::handle_image_data(const uint8_t *image_bytes,
     }
 
     // 4. Verify the image data CRC
+    uint16_t crc = crc16(rx_buffer, num_bytes);
+    if (crc != image_data_crc)
+    {
+        return CK_STATUS_BAD_CRC;
+    }
     
     // 5. Send the image piece to the image router
     if (_piece.is_complete())

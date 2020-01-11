@@ -53,7 +53,8 @@ enum AckStatus
     ACK_STATUS_INVALID_BURNER_STATE = 7,
     ACK_STATUS_UNKOWN_ERROR = 8,
     ACK_SATUS_IMAGE_PIECE_TOO_BIG = 9,
-    ACK_SATUS_RX_BUFFER_OVERFLOW = 10
+    ACK_SATUS_RX_BUFFER_OVERFLOW = 10,
+    CK_STATUS_BAD_CRC = 11
 };
 
 struct __attribute__((packed)) req_header
@@ -126,7 +127,6 @@ struct __attribute__((packed)) image_piece_header
     uint16_t start_y;
     uint16_t width;
     uint16_t height;
-    uint16_t header_crc;
     uint16_t image_data_crc;
     void deswizzle()
     {
@@ -134,7 +134,6 @@ struct __attribute__((packed)) image_piece_header
         start_y = ntohs(start_y);
         width = ntohs(width);
         height = ntohs(height);
-        header_crc = ntohs(header_crc);
         image_data_crc = ntohs(image_data_crc);
     }
     bool validate()

@@ -59,7 +59,6 @@ static AckStatus to_ack_status(uint16_t status)
     }
 }
 
-
 BurnerProtocolHandler::BurnerProtocolHandler(SerialInterface *serial) :
     _serial(serial),
     _client(NULL)
@@ -214,6 +213,51 @@ void BurnerProtocolHandler::handle_start_piece_request(const req_header *header)
 
     // start piece complete
     LOG("Start piece operation complete.\n");
+}
+
+void BurnerProtocolHandler::handle_image_data_request(const req_header *header)
+{
+    Op ack_op = IMG_DATA_REQ_OP;
+    image_data_req req;
+
+    if (!receive_remaining_req_data(header, &req, sizeof(req)))
+    {
+        LOG("I/O error receiving remainder of image data request.\n");
+        return_failure_ack(ack_op, ACK_STATUS_IO_ERROR);
+        return;
+    }
+
+    req.deswizzle();
+    if (!req.validate())
+    {
+        LOG("Image data request received.\n");
+        return_failure_ack(ack_op, ACK_SATUS_INVALID_REQUEST);
+        return;
+    }
+
+    bool complete;
+    AckStatus status = _client->handle_image_data(req.number_of_bytes, req.image_data_crc, _serial, &complete);
+    if (status != ACK_SATUS_SUCCESS)
+    {
+        LOG("Image data operation failed\n");
+        return_failure_ack(ack_op, status);
+        return;
+    }
+
+    image_data_ack ack(complete);
+    ack.swizzle();
+    size_t bytes_sent = _serial->writeBytes(reinterpret_cast<const uint8_t *>(&ack), sizeof(ack));
+    if (bytes_sent != sizeof(ack))
+    {
+        LOG("I/O error sending image data ACK. Restarting...\n");
+        // Can't really know how to handle this. Don't know if the request was sent or not.
+        // TODO: Should we try to send a failure? For now, yes
+        return_failure_ack(ack_op, ACK_STATUS_IO_ERROR);
+        return;
+    }
+
+    // start piece complete
+    LOG("Image data operation complete.\n");
 }
 
 

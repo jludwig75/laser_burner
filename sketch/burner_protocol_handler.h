@@ -27,8 +27,8 @@ public:
                                              uint16_t width,
                                              uint16_t height,
                                              uint16_t image_data_crc) = 0;
-        virtual AckStatus handle_image_data(const uint8_t *image_bytes,
-                                            uint16_t num_bytes,
+        virtual AckStatus handle_image_data(uint16_t num_bytes,
+                                            uint16_t image_data_crc,
                                             SerialInterface *serial,
                                             bool *complete) = 0;
     };
@@ -40,6 +40,7 @@ private:
 
     void handle_inquiry_request(const req_header *header);
     void handle_start_piece_request(const req_header *header);
+    void handle_image_data_request(const req_header *header);
     void return_failure_ack(Op opcode, AckStatus status);
 
     SerialInterface *_serial;
