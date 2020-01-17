@@ -25,8 +25,7 @@ public:
         virtual AckStatus handle_start_piece(uint16_t start_x,
                                              uint16_t start_y,
                                              uint16_t width,
-                                             uint16_t height,
-                                             uint16_t image_data_crc) = 0;
+                                             uint16_t height) = 0;
         virtual AckStatus handle_image_data(uint16_t num_bytes,
                                             uint16_t image_data_crc,
                                             SerialInterface *serial,

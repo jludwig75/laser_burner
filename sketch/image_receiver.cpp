@@ -27,9 +27,9 @@ static uint16_t crc16(const uint8_t *data_p, uint16_t length)
 
     do
     {
-        for (i=0, data=(uint32_t)0xff & *data_p++;
-                i < 8; 
-                i++, data >>= 1)
+        for (i = 0, data = static_cast<int32_t>(0xff & *data_p++);
+             i < 8;
+             i++, data >>= 1)
         {
             if (((crc & 0x0001) ^ (data & 0x0001)) != 0)
             {
@@ -87,8 +87,7 @@ AckStatus ImageReceiver::handle_inquiry(uint16_t *rx_buffer_size,
 AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
                                             uint16_t start_y,
                                             uint16_t width,
-                                            uint16_t height,
-                                            uint16_t image_data_crc)
+                                            uint16_t height)
 {
     if (_state != Ready && _state != ReadyWaitingForImageData)
     {
@@ -108,7 +107,6 @@ AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
     _piece_state.start_y = start_y;
     _piece_state.width = width;
     _piece_state.height = height;
-    _piece_state.image_data_crc = image_data_crc;
     _state = ReadyWaitingForImageData;
 
     // 1. Construct an image piece with the state data
@@ -156,6 +154,7 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
         {
             return ACK_STATUS_IO_ERROR;
         }
+        assert(bytes_received <= num_bytes);
 
         total_bytes_received += bytes_received;
     }
@@ -174,7 +173,7 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
         // 5. Reset the state to Ready
         _state = Ready;
 
-        // 6. Send the complete piece ack TODO: This won't work. It has to be sent after the ACK for this request.
+        // Tell the caller the image piece is complete
         *complete = true;
     }
     else
@@ -184,5 +183,5 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
     
 
     // 6. Return success when done.
-    return ACK_SATUS_NOT_IMPLEMENTED;
+    return ACK_SATUS_SUCCESS;
 }

@@ -20,8 +20,7 @@ public:
     virtual AckStatus handle_start_piece(uint16_t start_x,
                                          uint16_t start_y,
                                          uint16_t width,
-                                         uint16_t height,
-                                         uint16_t image_data_crc);
+                                         uint16_t height);
     virtual AckStatus handle_image_data(uint16_t num_bytes,
                                         uint16_t image_data_crc,
                                         SerialInterface *serial,
@@ -34,8 +33,7 @@ private:
             start_x(UINT16_MAX),
             start_y(UINT16_MAX),
             width(UINT16_MAX),
-            height(UINT16_MAX),
-            image_data_crc(0)
+            height(UINT16_MAX)
         {
         }
         bool is_set() const{
@@ -48,7 +46,6 @@ private:
         uint16_t start_y;
         uint16_t width;
         uint16_t height;
-        uint16_t image_data_crc;
     } _piece_state;
     SerialInterface *_serial;
     ImageRouter *_image_router;

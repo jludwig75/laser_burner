@@ -1,4 +1,5 @@
 #include "serial_port.h"
+#include "serial_port_test.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -8,6 +9,16 @@
 #include <unistd.h>  /* UNIX Standard Definitions 	   */ 
 #include <errno.h>   /* ERROR Number Definitions           */
 #include <sys/ioctl.h>
+
+#include <string>
+
+
+static std::string g_port_name = "";
+
+const std::string & get_serial_port_name()
+{
+    return g_port_name;
+}
 
 
 HardwareSerial::HardwareSerial() :
@@ -36,7 +47,8 @@ int HardwareSerial::begin(unsigned baud_rate)
         return -1;
     }
 
-    printf("pty device name: %s\n",  ptsname(_fd));
+    g_port_name = ptsname(_fd);
+    printf("pty device name: %s\n", g_port_name.c_str());
     fflush(stdout);
     grantpt(_fd);
     unlockpt(_fd);

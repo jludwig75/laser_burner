@@ -5,6 +5,14 @@ project(parking_sensor LANGUAGES CXX VERSION 2.11.0)
 
 enable_testing()
 
+# Catch2
+add_subdirectory(Catch2)
+
+add_library(unittest STATIC
+            test/unittest_main.cpp)
+target_link_libraries(unittest Catch2::Catch2)
+
+# laser_burner_sim
 add_executable(laser_burner_sim
                 test/laser_burner_sim.cpp
                 test/sketch.cpp
@@ -33,3 +41,20 @@ target_compile_definitions(laser_burner_sim PRIVATE
 
 target_link_libraries(laser_burner_sim
                         pthread)
+
+# burner_protocol test
+add_executable(burner_protocol_test
+                sketch/burner_protocol_handler.cpp
+
+                test/serial_interface.cpp
+                test/burner_protocol_test.cpp
+                test/serial_port.cpp
+                test/exec_process.cpp
+                )
+target_include_directories(burner_protocol_test PUBLIC
+                "${PROJECT_SOURCE_DIR}/sketch"
+                "${PROJECT_SOURCE_DIR}/test")
+target_link_libraries(burner_protocol_test
+                        unittest
+                        pthread
+                        Catch2::Catch2)

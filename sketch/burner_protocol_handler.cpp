@@ -189,8 +189,7 @@ void BurnerProtocolHandler::handle_start_piece_request(const req_header *header)
     AckStatus status = _client->handle_start_piece(req.image_piece.start_x,
                                                    req.image_piece.start_y,
                                                    req.image_piece.width,
-                                                   req.image_piece.height,
-                                                   req.image_piece.image_data_crc);
+                                                   req.image_piece.height);
     if (status != ACK_SATUS_SUCCESS)
     {
         LOG("Start piece operation failed\n");

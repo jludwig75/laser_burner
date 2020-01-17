@@ -33,10 +33,13 @@ Controller                Burner
 enum Op
 {
     UNKNOWN_OP = 0,
+
     INQUIRY_REQ_OP = 1,
     INQUIRY_ACK_OP = 2,
+
     START_PIECE_REQ_OP = 3,
     START_PIECE_ACK_OP = 4,
+
     IMG_DATA_REQ_OP = 5,
     IMG_DATA_ACK_OP = 6
 };
@@ -87,6 +90,7 @@ struct __attribute__((packed)) ack_header
     {
         magic = htons(magic);
         op = htons(op);
+        status = htons(status);
     }
 };
 
@@ -127,14 +131,12 @@ struct __attribute__((packed)) image_piece_header
     uint16_t start_y;
     uint16_t width;
     uint16_t height;
-    uint16_t image_data_crc;
     void deswizzle()
     {
         start_x = ntohs(start_x);
         start_y = ntohs(start_y);
         width = ntohs(width);
         height = ntohs(height);
-        image_data_crc = ntohs(image_data_crc);
     }
     bool validate()
     {
@@ -143,7 +145,6 @@ struct __attribute__((packed)) image_piece_header
             return false;
         }
 
-        // TODO: check header CRC
         return true;
     }
 };
