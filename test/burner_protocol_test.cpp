@@ -4,12 +4,15 @@
 #include "burner_protocol_handler.h"
 #include "serial_port_test.h"
 #include "exec_process.h"
+#include "strings.h"
 #include <thread>
-#include <sstream>
-#include <vector>
+
+using namespace std;
+
 
 #define TEST_RX_BUFFER_SIZE 1234
 #define TEST_MAX_DIM        1024
+
 
 class TestProtocolHanlder : public BurnerProtocolHandler::ProtocolHandlerClient
 {
@@ -38,51 +41,12 @@ public:
 
 };
 
-using namespace std;
 
 void run_handler(BurnerProtocolHandler &handler)
 {
     handler.on_loop();
 }
 
-vector<string> split(const string &str)
-{
-    stringstream ss(str);
-
-    vector<string> v;
-    while(ss)
-    {
-        string line;
-        ss >> line;
-        if (line[line.length() - 1] == '\n')
-        {
-            line.resize(line.length() - 1);
-        }
-        if (!line.empty())
-        {
-            v.push_back(line);
-        }
-    }
-
-    return v;
-}
-
-template<typename _T>
-bool from_string(const std::string &str, _T &t)
-{
-    stringstream ss(str);
-    ss >> t;
-    return ss.good() && ss.eof();
-}
-
-template<typename _T>
-std::string to_string(_T &t)
-{
-    stringstream ss;
-
-    ss << t;
-    return ss.str();
-}
 
 TEST_CASE("test laser burner protocol", "[protocol]") {
     SerialInterface serial_ifc;
