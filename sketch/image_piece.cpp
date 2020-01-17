@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+
 #define BITS_PER_BYTE       8
 #define ENTRIES_PER_BYTE    1
 // #define BITS_PER_ENTRY      (BITS_PER_BYTE / ENTRIES_PER_BYTE)

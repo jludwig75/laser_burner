@@ -1,3 +1,5 @@
+#include <string>
+
 #include "serial_port.h"
 #include "serial_port_test.h"
 
@@ -9,8 +11,6 @@
 #include <unistd.h>  /* UNIX Standard Definitions 	   */ 
 #include <errno.h>   /* ERROR Number Definitions           */
 #include <sys/ioctl.h>
-
-#include <string>
 
 
 static std::string g_port_name = "";

@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+
 #define MAX_PIECE_BYTES 512
 
 class ImagePiece

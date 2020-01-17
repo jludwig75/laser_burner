@@ -4,6 +4,7 @@
 
 #include "burner_image.h"
 
+
 #ifndef min
 #define min(x, y)   (x < y ? x : y)
 #endif // min

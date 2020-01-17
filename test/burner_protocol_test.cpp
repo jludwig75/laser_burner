@@ -1,11 +1,13 @@
+#include <thread>
+#include "string_utils.h"
+
 #include "catch2/catch.hpp"
 
 #include "serial_interface.h"
 #include "burner_protocol_handler.h"
 #include "serial_port_test.h"
 #include "exec_process.h"
-#include "strings.h"
-#include <thread>
+
 
 using namespace std;
 
@@ -72,5 +74,11 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
         REQUIRE(lines[2] == string("MAX_DIM=") + to_string(TEST_MAX_DIM));
 
         handler_thread.join();
+    }
+
+    SECTION("test start piece request") {
+    }
+
+    SECTION("test image data request") {
     }
 }
