@@ -51,11 +51,14 @@ class LaserBurnerSimTest(unittest.TestCase):
         global src_dir
 
         INPUT_IMAGE_NAME = 'test.bmp'
-        BURNER_IMAGE_NAME = 'inmage_to_burn.pgm'
+        BURNER_IMAGE_NAME = 'image_to_burn.pgm'
         BURNER_OUTPUT_IMAGE = 'burned_image.pgm'
 
         # run the sim in another process
         serial_device_name, p = self._start_laser_burner_sim(BURNER_OUTPUT_IMAGE)
+
+        # print('Press enter to continue...')
+        # input()
 
         # run the controller script to burn the image
         os.system('%s %s %s -o %s' % (os.path.join(src_dir, 'burn_image.py'), serial_device_name, os.path.join(src_dir, INPUT_IMAGE_NAME), BURNER_IMAGE_NAME))

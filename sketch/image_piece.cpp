@@ -57,7 +57,7 @@ uint16_t ImagePiece::height() const
 
 uint8_t ImagePiece::get_entry_byte(uint16_t x, uint16_t y) const
 {
-    uint16_t linear_entry = x * width() + y;
+    uint16_t linear_entry = y * width() + x;
     return linear_entry / ENTRIES_PER_BYTE;
 }
 
@@ -82,7 +82,7 @@ uint8_t ImagePiece::get_x_y_intensity(uint16_t x, uint16_t y) const
     //     assert(entry_nibble == 1);
     //     return byte >> BITS_PER_ENTRY;
     // }
-    return byte;
+    return UINT8_MAX - byte;
 }
 
 uint16_t ImagePiece::total_bytes() const

@@ -19,6 +19,7 @@ public:
     void println(const char *str);
     void println(char c);
     size_t getRxBufferSize();
+    void shutdown();
 private:
     int _fd;
 };

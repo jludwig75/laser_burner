@@ -21,6 +21,14 @@ const std::string & get_serial_port_name()
 }
 
 
+extern HardwareSerial serial;
+
+void shutdown_serial_port()
+{
+    serial.shutdown();
+}
+
+
 HardwareSerial::HardwareSerial() :
     _fd(-1)
 {
@@ -32,6 +40,16 @@ HardwareSerial::~HardwareSerial()
     {
         close(_fd);
     }
+}
+
+void HardwareSerial::shutdown()
+{
+    if (_fd != -1)
+    {
+        close(_fd);
+    }
+
+    _fd = -1;
 }
 
 int HardwareSerial::begin(unsigned baud_rate)

@@ -11,7 +11,9 @@ long map(long x, long in_min, long in_max, long out_min, long out_max)
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-Laser::Laser(uint16_t max_burn_time_ms, uint8_t max_intensity)
+Laser::Laser(uint16_t max_burn_time_ms, uint8_t max_intensity) :
+    _max_burn_time_ms(max_burn_time_ms),
+    _max_intensity(max_intensity)
 {
     assert(max_burn_time_ms > 0);
     assert(max_intensity > 0);
@@ -25,5 +27,5 @@ void Laser::burn(uint8_t intensity)
 
     unsigned image_intensity = map(intensity, 0, _max_intensity, 0, burner_image->max_intensity());
 
-    burner_image->set_value(image_intensity);
+    burner_image->set_value(UINT8_MAX - image_intensity);
 }

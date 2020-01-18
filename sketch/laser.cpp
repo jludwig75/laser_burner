@@ -11,7 +11,9 @@ void delay(long ms)
 {
 }
 
-Laser::Laser(uint16_t max_burn_time_ms, uint8_t max_intensity)
+Laser::Laser(uint16_t max_burn_time_ms, uint8_t max_intensity) :
+    _max_burn_time_ms(max_burn_time_ms),
+    _max_intensity(max_intensity)
 {
     assert(max_burn_time_ms > 0);
     assert(max_intensity > 0);

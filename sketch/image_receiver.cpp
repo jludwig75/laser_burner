@@ -7,7 +7,8 @@
 
 #include <assert.h>
 #include <stdio.h>
-#define LOG printf
+#define LOG
+// #define LOG printf
 #include <unistd.h>
 #define delay   usleep
 

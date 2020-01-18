@@ -1,6 +1,11 @@
 import serial
 from imageburner.burnerprotocol import InquiryReq, StartPieceReq, ImageDataReq
 
+def dump_bytes(bytes):
+    st = ''
+    for b in bytes:
+        st += str(int(b)) + ','
+    return st
 
 class BurnerConnection:
     def __init__(self, port_device):
@@ -27,8 +32,9 @@ class BurnerConnection:
         total_entries_to_send = width * height
         assert total_entries_to_send == len(img_data)
         assert total_entries_to_send <= self._max_piece_size
-        assert x + width < self._max_dim
-        assert y + height < self._max_dim
+        assert x + width <= self._max_dim
+        assert y + height <= self._max_dim
+        # print("Sending %ux%u piece at (%u, %u)\n" % (width, height, x, y))
         start_req = StartPieceReq(self._serial, x, y, width, height)
         ack = start_req.send()
         if ack.status != 0:
@@ -36,7 +42,9 @@ class BurnerConnection:
         entries_sent = 0
         while entries_sent < total_entries_to_send:
             entries_to_send = min(total_entries_to_send - entries_sent, self._rx_buffer_size)
+            # print('sending %u entries' % entries_to_send)
             img_piece = img_data[entries_sent:entries_sent + entries_to_send]
+            # print('Sending %s' % dump_bytes(img_piece))
             img_data_req = ImageDataReq(self._serial, len(img_piece), 0)   # TODO: set CRC
             ack = img_data_req.send(img_piece)
             if ack.status != 0:
@@ -53,7 +61,7 @@ class BurnerConnection:
         total_image_entries = img.size[0] * img.size[1]
         entries_xferred = 0
         while entries_xferred < total_image_entries:
-            start_y = entries_xferred / img.size[0]
+            start_y = entries_xferred // img.size[0]
             start_x = entries_xferred % img.size[0]
             # transfer as much of this row as we can
             # This is not very efficient, but we can change that later
@@ -61,7 +69,11 @@ class BurnerConnection:
             img_data = bytearray(entries_to_send)
             for x in range(start_x, start_x + entries_to_send):
                 b = img.getpixel((x, start_y))
+                # print('got %u at (%u, %u)' % (int(b), x, start_y))
+                # print('Adding %u at %u' % (int(b), x - start_x))
                 img_data[x - start_x] = b
+            # print('starting piece with %u entries: %s' % (entries_to_send, dump_bytes(img_data)))
             self._send_image_piece(start_x, start_y, entries_to_send, 1, img_data)
+            entries_xferred += entries_to_send
             
 

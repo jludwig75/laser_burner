@@ -80,6 +80,49 @@ target_link_libraries(image_receiver_test
 add_test(image_receiver_test image_receiver_test)
 
 
+# burner_script_to_image_burner_test
+add_executable(burner_script_to_image_burner_test
+                sketch/burner_protocol_handler.cpp
+                sketch/image_receiver.cpp
+                sketch/image_piece.cpp
+                sketch/image_router.cpp
+
+                test/serial_port.cpp
+                test/serial_interface.cpp
+                test/burner_script_to_image_burner_test.cpp
+                test/image_building_burner.cpp
+                test/image_builder.cpp
+                test/exec_process.cpp
+                )
+target_include_directories(burner_script_to_image_burner_test PUBLIC
+                "${PROJECT_SOURCE_DIR}/sketch"
+                "${PROJECT_SOURCE_DIR}/test"
+                "${PROJECT_SOURCE_DIR}/CImg"
+                )
+target_compile_definitions(burner_script_to_image_burner_test PRIVATE
+                cimg_display=0)
+target_link_libraries(burner_script_to_image_burner_test
+                        unittest
+                        pthread
+                        Catch2::Catch2)
+add_test(burner_script_to_image_burner_test burner_script_to_image_burner_test)
+
+
+add_executable(make-gradient-image
+                make-gradient-img.cpp
+                )
+target_include_directories(make-gradient-image PUBLIC
+                "${PROJECT_SOURCE_DIR}/CImg"
+                )
+target_compile_definitions(make-gradient-image PRIVATE
+                cimg_display=0)
+# target_link_libraries(burner_script_to_image_burner_test
+#                         unittest
+#                         pthread
+#                         Catch2::Catch2)
+# add_test(burner_script_to_image_burner_test burner_script_to_image_burner_test)
+
+
 # laser_burner_sim_test
 add_test(laser_burner_sim_test
             python3 ${PROJECT_SOURCE_DIR}/test/laser_burner_sim_test.py -s ${PROJECT_SOURCE_DIR})
