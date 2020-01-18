@@ -100,6 +100,10 @@ public:
         {
             return ACK_STATUS_INVALID_PARAMETER;
         }
+        if (width * height > TEST_RX_BUFFER_SIZE)
+        {
+            return ACK_STATUS_IMAGE_PIECE_TOO_BIG;
+        }
         _start_piece_data.set(start_x, start_y, width, height);
         return ACK_STATUS_SUCCESS;
     }
@@ -160,7 +164,7 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
         REQUIRE(test_handler.start_piece_data().width() != 98);
         REQUIRE(test_handler.start_piece_data().height() != 111);
 
-        string command = string("../exercise_protocol.py -o START -p '{\"x\": 45, \"y\": 47, \"width\": 98, \"height\": 111}' ") + get_serial_port_name();
+        string command = string("../exercise_protocol.py -o START -p '{\"x\": 45, \"y\": 47, \"width\": 98, \"height\": 11}' ") + get_serial_port_name();
 
         string output = exec(command);
 
@@ -172,7 +176,7 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
         REQUIRE(test_handler.start_piece_data().x() == 45);
         REQUIRE(test_handler.start_piece_data().y() == 47);
         REQUIRE(test_handler.start_piece_data().width() == 98);
-        REQUIRE(test_handler.start_piece_data().height() == 111);
+        REQUIRE(test_handler.start_piece_data().height() == 11);
     }
 
     SECTION("test image data request") {
