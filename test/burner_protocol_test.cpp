@@ -19,6 +19,11 @@ using namespace std;
 class TestProtocolHanlder : public BurnerProtocolHandler::ProtocolHandlerClient
 {
 public:
+    TestProtocolHanlder() :
+        _complete_on_next_image_data(false)
+    {
+
+    }
     class StartPieceData
     {
     public:
@@ -96,10 +101,12 @@ public:
                                             uint16_t width,
                                             uint16_t height)
     {
+        // This checks is only necessary to test error handing.
         if (width == 0 || height == 0 || start_x + width > TEST_MAX_DIM || start_y + height > TEST_MAX_DIM)
         {
             return ACK_STATUS_INVALID_PARAMETER;
         }
+        // This checks is only necessary to test error handing.
         if (width * height > TEST_RX_BUFFER_SIZE)
         {
             return ACK_STATUS_IMAGE_PIECE_TOO_BIG;
@@ -113,6 +120,10 @@ public:
                                         bool *complete)
     {
         _image_data_data.set(num_bytes, image_data_crc);
+        vector<uint8_t> buffer(num_bytes);
+        serial->readBytes(&buffer[0], buffer.size());
+        _received_image_data = string(buffer.begin(), buffer.end());
+        *complete = _complete_on_next_image_data;
         return ACK_STATUS_SUCCESS;
     }
     const StartPieceData &start_piece_data() const
@@ -123,9 +134,19 @@ public:
     {
         return _image_data_data;
     }
+    const string & received_image_data() const
+    {
+        return _received_image_data;
+    }
+    void complete_on_next_image_data()
+    {
+        _complete_on_next_image_data = true;
+    }
 private:
+    bool _complete_on_next_image_data;
     StartPieceData _start_piece_data;
     ImageDataData _image_data_data;
+    string _received_image_data;
 };
 
 
@@ -169,7 +190,7 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
         string output = exec(command);
 
         auto lines = split(output);
-        REQUIRE(lines.size() >= 1);
+        REQUIRE(lines.size() == 1);
         REQUIRE(lines[0] == "SUCCESS");
 
         // Make sure the data was sent correctly
@@ -183,18 +204,34 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
         // prove that it was not already set to the values expected after running the test
         REQUIRE(test_handler.image_data_data().number_of_bytes() != 45);
         REQUIRE(test_handler.image_data_data().image_data_crc() != 47);
+        const string test_image_data = "This is just a test string. Make it kind of long just for fun";
+        string command = string("../exercise_protocol.py -o IMGDATA -p '{\"crc\": 47, \"image_data\": \"") + 
+                            test_image_data +
+                            "\"}' " + get_serial_port_name();
 
-        string command = string("../exercise_protocol.py -o IMGDATA -p '{\"number_of_bytes\": 45, \"crc\": 47}' ") + get_serial_port_name();
+        SECTION("test incomplete image piece") {
+            string output = exec(command);
 
-        string output = exec(command);
+            auto lines = split(output);
+            REQUIRE(lines.size() == 2);
+            REQUIRE(lines[0] == "SUCCESS");
+            REQUIRE(lines[1] == "COMPLETE=0");
+        }
 
-        auto lines = split(output);
-        REQUIRE(lines.size() >= 1);
-        REQUIRE(lines[0] == "SUCCESS");
+        SECTION("test complete image piece") {
+            test_handler.complete_on_next_image_data();
+            string output = exec(command);
+
+            auto lines = split(output);
+            REQUIRE(lines.size() == 2);
+            REQUIRE(lines[0] == "SUCCESS");
+            REQUIRE(lines[1] == "COMPLETE=1");
+        }
 
         // Make sure the data was sent correctly
-        REQUIRE(test_handler.image_data_data().number_of_bytes() == 45);
+        REQUIRE(test_handler.image_data_data().number_of_bytes() == test_image_data.length());
         REQUIRE(test_handler.image_data_data().image_data_crc() == 47);
+        REQUIRE(test_image_data == test_handler.received_image_data());
     }
 
     handler_thread.join();

@@ -33,14 +33,15 @@ def send_start_image_piece(serial_port, baud_rate, params):
 
 def send_image_data(serial_port, baud_rate, params):
     serial_con = serial.Serial(serial_port, baud_rate)
-    reg_request = ImageDataReq(serial_con, params['number_of_bytes'], params['crc'])
+    image_data = params['image_data'].encode()
+    reg_request = ImageDataReq(serial_con, len(image_data), params['crc'])
     try:
-        ack = reg_request.send()
+        ack = reg_request.send(image_data)
         if ack.status != 0:
             print('ERROR: %u' % ack.status)
         else:
             print('SUCCESS')
-            print('COMPLETE=%s' % str(ack.status))
+            print('COMPLETE=%u' % (1 if ack.complete else 0))
     except Exception as e:
         print('ERROR: %s' % str(e))
 
