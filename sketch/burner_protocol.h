@@ -45,17 +45,17 @@ enum Op
 
 enum AckStatus
 {
-    ACK_SATUS_SUCCESS = 0,
-    ACK_SATUS_BAD_MAGIC = 1,
-    ACK_SATUS_INVALID_REQUEST_OP = 2,
-    ACK_SATUS_INVALID_REQUEST = 3,
-    ACK_SATUS_INVALID_PARAMETER = 4,
-    ACK_SATUS_NOT_IMPLEMENTED = 5,
+    ACK_STATUS_SUCCESS = 0,
+    ACK_STATUS_BAD_MAGIC = 1,
+    ACK_STATUS_INVALID_REQUEST_OP = 2,
+    ACK_STATUS_INVALID_REQUEST = 3,
+    ACK_STATUS_INVALID_PARAMETER = 4,
+    ACK_STATUS_NOT_IMPLEMENTED = 5,
     ACK_STATUS_IO_ERROR = 6,
     ACK_STATUS_INVALID_BURNER_STATE = 7,
     ACK_STATUS_UNKOWN_ERROR = 8,
-    ACK_SATUS_IMAGE_PIECE_TOO_BIG = 9,
-    ACK_SATUS_RX_BUFFER_OVERFLOW = 10,
+    ACK_STATUS_IMAGE_PIECE_TOO_BIG = 9,
+    ACK_STATUS_RX_BUFFER_OVERFLOW = 10,
     CK_STATUS_BAD_CRC = 11
 };
 
@@ -111,7 +111,7 @@ struct __attribute__((packed)) inquiry_ack : public ack_header
     uint16_t rx_buffer_size;
     uint16_t max_dim;
     inquiry_ack(uint16_t rx_buffer_size, uint16_t max_dim) :
-        ack_header(INQUIRY_ACK_OP, ACK_SATUS_SUCCESS),
+        ack_header(INQUIRY_ACK_OP, ACK_STATUS_SUCCESS),
         rx_buffer_size(rx_buffer_size),
         max_dim(max_dim)
     {
@@ -175,7 +175,7 @@ struct __attribute__((packed)) start_piece_req : public req_header
 struct __attribute__((packed)) start_piece_ack : public ack_header
 {
     start_piece_ack() :
-        ack_header(START_PIECE_ACK_OP, ACK_SATUS_SUCCESS)
+        ack_header(START_PIECE_ACK_OP, ACK_STATUS_SUCCESS)
     {
     }
 };
@@ -184,13 +184,19 @@ struct __attribute__((packed)) image_data_req : public req_header
 {
     uint16_t number_of_bytes;   // number of image bytes following this reqeust
     uint16_t image_data_crc;    // CRC of image data beingsent
+    void deswizzle()
+    {
+        req_header::deswizzle();
+        number_of_bytes = ntohs(number_of_bytes);
+        image_data_crc = ntohs(image_data_crc);
+    }
 };
 
 struct __attribute__((packed)) image_data_ack : public ack_header
 {
     uint8_t complete;
     image_data_ack(bool complete) :
-        ack_header(IMG_DATA_ACK_OP, ACK_SATUS_SUCCESS),
+        ack_header(IMG_DATA_ACK_OP, ACK_STATUS_SUCCESS),
         complete(complete ? 1: 0)
     {
     }

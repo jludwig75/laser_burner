@@ -81,7 +81,7 @@ AckStatus ImageReceiver::handle_inquiry(uint16_t *rx_buffer_size,
     *rx_buffer_size = 64;
     *max_dim = _max_dim;
 
-    return ACK_SATUS_SUCCESS;
+    return ACK_STATUS_SUCCESS;
 }
 
 AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
@@ -100,7 +100,7 @@ AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
     // Validate parameters
     if (width == 0 || height == 0 || start_x + width > _max_dim || start_y + height > _max_dim)
     {
-        return ACK_SATUS_INVALID_PARAMETER;
+        return ACK_STATUS_INVALID_PARAMETER;
     }
 
     _piece_state.start_x = start_x;
@@ -112,10 +112,10 @@ AckStatus ImageReceiver::handle_start_piece(uint16_t start_x,
     // 1. Construct an image piece with the state data
     if (!_piece.init(_piece_state.start_x, _piece_state.start_y, _piece_state.width, _piece_state.height))
     {
-        return ACK_SATUS_IMAGE_PIECE_TOO_BIG;
+        return ACK_STATUS_IMAGE_PIECE_TOO_BIG;
     }
 
-    return ACK_SATUS_SUCCESS;
+    return ACK_STATUS_SUCCESS;
 }
 
 AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
@@ -136,14 +136,14 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
     uint16_t max_rx_bytes = _piece.rx_buffer_bytes_remaining();
     if (num_bytes > max_rx_bytes)
     {
-        return ACK_SATUS_RX_BUFFER_OVERFLOW;
+        return ACK_STATUS_RX_BUFFER_OVERFLOW;
     }
 
     // 3. Receive the image data from the serial interface
     uint8_t *rx_buffer = _piece.get_data_rx_buffer(num_bytes);
     if (!rx_buffer)
     {
-        return ACK_SATUS_RX_BUFFER_OVERFLOW;
+        return ACK_STATUS_RX_BUFFER_OVERFLOW;
     }
 
     size_t total_bytes_received = 0;
@@ -183,5 +183,5 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
     
 
     // 6. Return success when done.
-    return ACK_SATUS_SUCCESS;
+    return ACK_STATUS_SUCCESS;
 }

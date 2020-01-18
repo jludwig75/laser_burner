@@ -37,18 +37,18 @@ static AckStatus to_ack_status(uint16_t status)
 {
     switch(status)
     {
-    case ACK_SATUS_SUCCESS:
-        return ACK_SATUS_SUCCESS;
-    case ACK_SATUS_BAD_MAGIC:
-        return ACK_SATUS_BAD_MAGIC;
-    case ACK_SATUS_INVALID_REQUEST_OP:
-        return ACK_SATUS_INVALID_REQUEST_OP;
-    case ACK_SATUS_INVALID_REQUEST:
-        return ACK_SATUS_INVALID_REQUEST;
-    case ACK_SATUS_INVALID_PARAMETER:
-        return ACK_SATUS_INVALID_PARAMETER;
-    case ACK_SATUS_NOT_IMPLEMENTED:
-        return ACK_SATUS_NOT_IMPLEMENTED;
+    case ACK_STATUS_SUCCESS:
+        return ACK_STATUS_SUCCESS;
+    case ACK_STATUS_BAD_MAGIC:
+        return ACK_STATUS_BAD_MAGIC;
+    case ACK_STATUS_INVALID_REQUEST_OP:
+        return ACK_STATUS_INVALID_REQUEST_OP;
+    case ACK_STATUS_INVALID_REQUEST:
+        return ACK_STATUS_INVALID_REQUEST;
+    case ACK_STATUS_INVALID_PARAMETER:
+        return ACK_STATUS_INVALID_PARAMETER;
+    case ACK_STATUS_NOT_IMPLEMENTED:
+        return ACK_STATUS_NOT_IMPLEMENTED;
     case ACK_STATUS_IO_ERROR:
         return ACK_STATUS_IO_ERROR;
     case ACK_STATUS_INVALID_BURNER_STATE:
@@ -96,7 +96,7 @@ void BurnerProtocolHandler::on_loop()
     if (!deswizzled_header.validate())
     {
         LOG("Received invalid request header");
-        return_failure_ack(UNKNOWN_OP, ACK_SATUS_INVALID_REQUEST);
+        return_failure_ack(UNKNOWN_OP, ACK_STATUS_INVALID_REQUEST);
         return;
     }
 
@@ -109,10 +109,11 @@ void BurnerProtocolHandler::on_loop()
         handle_start_piece_request(&header);
         break;
     case IMG_DATA_REQ_OP:
+        handle_image_data_request(&header);
         break;
     default:
         LOG("Received request with invalid opcode %u.\n", header.op);
-        return_failure_ack(to_ack_op_code(header.op), ACK_SATUS_INVALID_REQUEST_OP);
+        return_failure_ack(to_ack_op_code(header.op), ACK_STATUS_INVALID_REQUEST_OP);
         return;
     }
 }
@@ -133,7 +134,7 @@ void BurnerProtocolHandler::handle_inquiry_request(const req_header *header)
     if (!req.validate())
     {
         LOG("Invalid inquiry request received.\n");
-        return_failure_ack(ack_op, ACK_SATUS_INVALID_REQUEST);
+        return_failure_ack(ack_op, ACK_STATUS_INVALID_REQUEST);
         return;
     }
 
@@ -141,7 +142,7 @@ void BurnerProtocolHandler::handle_inquiry_request(const req_header *header)
     uint16_t max_dim;
     AckStatus status = _client->handle_inquiry(&rx_buffer_size, &max_dim);
 
-    if (status != ACK_SATUS_SUCCESS)
+    if (status != ACK_STATUS_SUCCESS)
     {
         LOG("Inquiry operation failed\n");
         return_failure_ack(ack_op, status);
@@ -182,7 +183,7 @@ void BurnerProtocolHandler::handle_start_piece_request(const req_header *header)
     if (!req.validate())
     {
         LOG("Invalid start piece request received.\n");
-        return_failure_ack(ack_op, ACK_SATUS_INVALID_REQUEST);
+        return_failure_ack(ack_op, ACK_STATUS_INVALID_REQUEST);
         return;
     }
 
@@ -190,7 +191,7 @@ void BurnerProtocolHandler::handle_start_piece_request(const req_header *header)
                                                    req.image_piece.start_y,
                                                    req.image_piece.width,
                                                    req.image_piece.height);
-    if (status != ACK_SATUS_SUCCESS)
+    if (status != ACK_STATUS_SUCCESS)
     {
         LOG("Start piece operation failed\n");
         return_failure_ack(ack_op, status);
@@ -230,13 +231,13 @@ void BurnerProtocolHandler::handle_image_data_request(const req_header *header)
     if (!req.validate())
     {
         LOG("Image data request received.\n");
-        return_failure_ack(ack_op, ACK_SATUS_INVALID_REQUEST);
+        return_failure_ack(ack_op, ACK_STATUS_INVALID_REQUEST);
         return;
     }
 
     bool complete;
     AckStatus status = _client->handle_image_data(req.number_of_bytes, req.image_data_crc, _serial, &complete);
-    if (status != ACK_SATUS_SUCCESS)
+    if (status != ACK_STATUS_SUCCESS)
     {
         LOG("Image data operation failed\n");
         return_failure_ack(ack_op, status);
@@ -281,7 +282,7 @@ bool BurnerProtocolHandler::receive_remaining_req_data(const req_header *header,
 
 void BurnerProtocolHandler::return_failure_ack(Op opcode, AckStatus status)
 {
-    assert(status != ACK_SATUS_SUCCESS);
+    assert(status != ACK_STATUS_SUCCESS);
 
     ack_header ack(opcode, status);
     ack.swizzle();

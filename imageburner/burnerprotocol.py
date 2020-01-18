@@ -145,7 +145,7 @@ class ImageDataReq:
 
     def send(self):
         self._serial.write(self._req_bytes)
-        ack = StartPieceAck(self._serial)
+        ack = ImageDataAck(self._serial)
         ack.receive()
         return ack
 
