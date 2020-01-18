@@ -27,3 +27,9 @@ size_t SerialInterface::writeBytes(const uint8_t* buffer, size_t count)
 {
     return serial.write(buffer, count);
 }
+
+size_t SerialInterface::getRxBufferSize()
+{
+    return serial.getRxBufferSize();
+}
+

@@ -47,6 +47,7 @@ private:
         uint16_t width;
         uint16_t height;
     } _piece_state;
+    SerialInterface *_serial;
     ImageRouter *_image_router;
     BurnerProtocolHandler _protocol_handler;
     uint16_t _max_dim;

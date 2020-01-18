@@ -20,6 +20,7 @@ public:
     uint8_t *get_data_rx_buffer(uint16_t bytes_to_add);
     bool report_bytes_added_to_rx_buffer(uint16_t bytes_added);
     uint16_t total_bytes() const;
+    const uint8_t *get_data_start_buffer() const;
 private:
     uint8_t get_entry_byte(uint16_t x, uint16_t y) const;
     // uint8_t get_entry_nibble(uint16_t x, uint16_t y) const;

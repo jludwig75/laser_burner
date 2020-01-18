@@ -11,4 +11,5 @@ public:
     int available();
     size_t readBytes(uint8_t* buffer, size_t size);
     size_t writeBytes(const uint8_t* buffer, size_t count);
+    size_t getRxBufferSize();
 };

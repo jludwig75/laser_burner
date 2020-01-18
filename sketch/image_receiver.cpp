@@ -52,6 +52,7 @@ static uint16_t crc16(const uint8_t *data_p, uint16_t length)
 
 
 ImageReceiver::ImageReceiver(SerialInterface *serial, ImageRouter *image_router, uint16_t max_dim) :
+    _serial(serial),
     _image_router(image_router),
     _protocol_handler(serial),
     _max_dim(max_dim),
@@ -76,8 +77,7 @@ AckStatus ImageReceiver::handle_inquiry(uint16_t *rx_buffer_size,
         return ACK_STATUS_INVALID_BURNER_STATE;
     }
 
-    // TODO: get RX buffer size from serial interface
-    *rx_buffer_size = 64;
+    *rx_buffer_size = _serial->getRxBufferSize();
     *max_dim = _max_dim;
 
     return ACK_STATUS_SUCCESS;
@@ -128,6 +128,11 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
         return ACK_STATUS_INVALID_BURNER_STATE;
     }
 
+    if (num_bytes > _serial->getRxBufferSize())
+    {
+        return ACK_STATUS_RX_BUFFER_OVERFLOW;
+    }
+
     // Has to be set if state is ReadyWaitingForImageData
     assert(_piece_state.is_set());
 
@@ -157,6 +162,8 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
 
         total_bytes_received += bytes_received;
     }
+
+    _piece.report_bytes_added_to_rx_buffer(num_bytes);
 
 /*  Test CRC after testing the transfer code.
     // 4. Verify the image data CRC

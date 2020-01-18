@@ -155,3 +155,8 @@ void HardwareSerial::println(char c)
 
     ssize_t len = write((const uint8_t *)buffer, sizeof(buffer));
 }
+
+size_t HardwareSerial::getRxBufferSize()
+{
+    return 64;  // Match Arduino Uno R3
+}

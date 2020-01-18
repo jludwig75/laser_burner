@@ -134,3 +134,8 @@ bool ImagePiece::report_bytes_added_to_rx_buffer(uint16_t bytes_added)
 
     return _current_index == total_bytes();
 }
+
+const uint8_t *ImagePiece::get_data_start_buffer() const
+{
+    return _image_data;
+}

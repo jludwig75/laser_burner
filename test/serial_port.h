@@ -18,6 +18,7 @@ public:
     size_t write(const uint8_t *buffer, size_t size);
     void println(const char *str);
     void println(char c);
+    size_t getRxBufferSize();
 private:
     int _fd;
 };
