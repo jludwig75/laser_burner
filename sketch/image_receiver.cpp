@@ -52,7 +52,6 @@ static uint16_t crc16(const uint8_t *data_p, uint16_t length)
 
 
 ImageReceiver::ImageReceiver(SerialInterface *serial, ImageRouter *image_router, uint16_t max_dim) :
-    _serial(serial),
     _image_router(image_router),
     _protocol_handler(serial),
     _max_dim(max_dim),
@@ -159,13 +158,14 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
         total_bytes_received += bytes_received;
     }
 
+/*  Test CRC after testing the transfer code.
     // 4. Verify the image data CRC
     uint16_t crc = crc16(rx_buffer, num_bytes);
     if (crc != image_data_crc)
     {
-        return CK_STATUS_BAD_CRC;
+        return ACK_STATUS_BAD_CRC;
     }
-    
+*/    
     // 5. Send the image piece to the image router
     if (_piece.is_complete())
     {

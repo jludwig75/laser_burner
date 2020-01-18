@@ -56,7 +56,7 @@ enum AckStatus
     ACK_STATUS_UNKOWN_ERROR = 8,
     ACK_STATUS_IMAGE_PIECE_TOO_BIG = 9,
     ACK_STATUS_RX_BUFFER_OVERFLOW = 10,
-    CK_STATUS_BAD_CRC = 11
+    ACK_STATUS_BAD_CRC = 11
 };
 
 struct __attribute__((packed)) req_header

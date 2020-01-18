@@ -31,6 +31,8 @@ bool ImagePiece::init(uint16_t start_x, uint16_t start_y, uint16_t width, uint16
     _width = width;
     _height = height;
     _current_index = 0;
+
+    return true;
 }
 
 uint16_t ImagePiece::start_x() const
@@ -127,4 +129,8 @@ bool ImagePiece::report_bytes_added_to_rx_buffer(uint16_t bytes_added)
     }
 
     _current_index += bytes_added;
+
+    assert(_current_index <= total_bytes());
+
+    return _current_index == total_bytes();
 }

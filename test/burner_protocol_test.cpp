@@ -201,9 +201,9 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
     }
 
     SECTION("test image data request") {
-        // prove that it was not already set to the values expected after running the test
-        REQUIRE(test_handler.image_data_data().number_of_bytes() != 45);
-        REQUIRE(test_handler.image_data_data().image_data_crc() != 47);
+        // prove that these are set to there uninitialized values
+        REQUIRE(test_handler.image_data_data().number_of_bytes() == UINT16_MAX);
+        REQUIRE(test_handler.image_data_data().image_data_crc() == UINT16_MAX);
         const string test_image_data = "This is just a test string. Make it kind of long just for fun";
         string command = string("../exercise_protocol.py -o IMGDATA -p '{\"crc\": 47, \"image_data\": \"") + 
                             test_image_data +

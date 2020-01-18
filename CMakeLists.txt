@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 # set the project name
 project(parking_sensor LANGUAGES CXX VERSION 2.11.0)
 
+include(CTest)
 enable_testing()
 
 # Catch2
@@ -42,12 +43,12 @@ target_compile_definitions(laser_burner_sim PRIVATE
 target_link_libraries(laser_burner_sim
                         pthread)
 
-# burner_protocol test
+# burner_protocol_test
 add_executable(burner_protocol_test
                 sketch/burner_protocol_handler.cpp
 
-                test/serial_interface.cpp
                 test/burner_protocol_test.cpp
+                test/serial_interface.cpp
                 test/serial_port.cpp
                 test/exec_process.cpp
                 )
@@ -58,3 +59,27 @@ target_link_libraries(burner_protocol_test
                         unittest
                         pthread
                         Catch2::Catch2)
+add_test(burner_protocol_test burner_protocol_test)
+
+# image_receiver_test
+add_executable(image_receiver_test
+                sketch/burner_protocol_handler.cpp
+                sketch/image_receiver.cpp
+                sketch/image_piece.cpp
+
+                test/image_receiver_test.cpp
+                test/mock_serial_interface.cpp
+                )
+target_include_directories(image_receiver_test PUBLIC
+                "${PROJECT_SOURCE_DIR}/sketch"
+                "${PROJECT_SOURCE_DIR}/test")
+target_link_libraries(image_receiver_test
+                        unittest
+                        pthread
+                        Catch2::Catch2)
+add_test(image_receiver_test image_receiver_test)
+
+
+# laser_burner_sim_test
+add_test(laser_burner_sim_test
+            python3 ${PROJECT_SOURCE_DIR}/test/laser_burner_sim_test.py -s ${PROJECT_SOURCE_DIR})
