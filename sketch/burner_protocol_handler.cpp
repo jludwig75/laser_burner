@@ -34,32 +34,6 @@ static Op to_ack_op_code(uint16_t opcode)
     }
 }
 
-static AckStatus to_ack_status(uint16_t status)
-{
-    switch(status)
-    {
-    case ACK_STATUS_SUCCESS:
-        return ACK_STATUS_SUCCESS;
-    case ACK_STATUS_BAD_MAGIC:
-        return ACK_STATUS_BAD_MAGIC;
-    case ACK_STATUS_INVALID_REQUEST_OP:
-        return ACK_STATUS_INVALID_REQUEST_OP;
-    case ACK_STATUS_INVALID_REQUEST:
-        return ACK_STATUS_INVALID_REQUEST;
-    case ACK_STATUS_INVALID_PARAMETER:
-        return ACK_STATUS_INVALID_PARAMETER;
-    case ACK_STATUS_NOT_IMPLEMENTED:
-        return ACK_STATUS_NOT_IMPLEMENTED;
-    case ACK_STATUS_IO_ERROR:
-        return ACK_STATUS_IO_ERROR;
-    case ACK_STATUS_INVALID_BURNER_STATE:
-        return ACK_STATUS_INVALID_BURNER_STATE;
-    case ACK_STATUS_UNKOWN_ERROR:
-    default:
-        return ACK_STATUS_UNKOWN_ERROR;
-    }
-}
-
 BurnerProtocolHandler::BurnerProtocolHandler(SerialInterface *serial) :
     _serial(serial),
     _client(NULL)
@@ -69,10 +43,6 @@ BurnerProtocolHandler::BurnerProtocolHandler(SerialInterface *serial) :
 void BurnerProtocolHandler::register_client(ProtocolHandlerClient *client)
 {
     _client = client;
-}
-
-void BurnerProtocolHandler::complete_image_piece(AckStatus status)
-{
 }
 
 void BurnerProtocolHandler::on_loop()

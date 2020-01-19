@@ -33,7 +33,6 @@ public:
                                             bool *complete) = 0;
     };
     void register_client(ProtocolHandlerClient *client);
-    void complete_image_piece(AckStatus status);
     void on_loop();
 private:
     bool receive_remaining_req_data(const req_header *header, void *req, uint16_t full_req_size);
