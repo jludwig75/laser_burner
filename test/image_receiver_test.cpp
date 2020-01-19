@@ -48,6 +48,8 @@ void add_image_piece_to_rx_buffer(const ImagePiece &piece)
                                             piece.get_data_start_buffer() + piece.total_bytes()));
 }
 
+uint16_t crc16(const uint8_t *data_p, uint16_t length);
+
 SCENARIO("test image receiver", "[image_receiver]") {
     ImageRouter router(NULL);
     SerialInterface serial;
@@ -72,7 +74,7 @@ SCENARIO("test image receiver", "[image_receiver]") {
 
         WHEN("image data is sent without sending a start request") {
             bool complete;
-            AckStatus status = receiver.handle_image_data(test_piece.total_bytes(), 0, &serial, &complete);
+            AckStatus status = receiver.handle_image_data(test_piece.total_bytes(), crc16(test_piece.get_data_start_buffer(), test_piece.total_bytes()), &serial, &complete);
             THEN("an invalid state error is returned") {
                 REQUIRE(status == ACK_STATUS_INVALID_BURNER_STATE);
             }
@@ -119,7 +121,7 @@ SCENARIO("test image receiver", "[image_receiver]") {
 
         WHEN("the image is sent in one xfer") {
             bool complete;
-            REQUIRE(receiver.handle_image_data(test_piece.total_bytes(), 0, &serial, &complete) == ACK_STATUS_SUCCESS);
+            REQUIRE(receiver.handle_image_data(test_piece.total_bytes(), crc16(test_piece.get_data_start_buffer(), test_piece.total_bytes()), &serial, &complete) == ACK_STATUS_SUCCESS);
             REQUIRE(complete);
 
             THEN("the image is received correctly") {
@@ -141,14 +143,14 @@ SCENARIO("test image receiver", "[image_receiver]") {
             bool complete;
 
             uint16_t bytes_to_send = test_piece.total_bytes() / 2;
-            REQUIRE(receiver.handle_image_data(bytes_to_send, 0, &serial, &complete) == ACK_STATUS_SUCCESS);
+            REQUIRE(receiver.handle_image_data(bytes_to_send, crc16(test_piece.get_data_start_buffer(), bytes_to_send), &serial, &complete) == ACK_STATUS_SUCCESS);
             REQUIRE(!complete);
 
             // Make sure no piece has been sent yet.
             REQUIRE(received_piece.total_bytes() == 0);
 
-            bytes_to_send = test_piece.total_bytes() - bytes_to_send;
-            REQUIRE(receiver.handle_image_data(bytes_to_send, 0, &serial, &complete) == ACK_STATUS_SUCCESS);
+            uint16_t new_bytes_to_send = test_piece.total_bytes() - bytes_to_send;
+            REQUIRE(receiver.handle_image_data(new_bytes_to_send, crc16(test_piece.get_data_start_buffer() + bytes_to_send, new_bytes_to_send), &serial, &complete) == ACK_STATUS_SUCCESS);
             REQUIRE(complete);
 
             THEN("the image is received correctly") {
@@ -172,7 +174,7 @@ SCENARIO("test image receiver", "[image_receiver]") {
 
         WHEN("the image is sent in one xfer") {
             bool complete;
-            AckStatus status = receiver.handle_image_data(test_piece.total_bytes(), 0, &serial, &complete);
+            AckStatus status = receiver.handle_image_data(test_piece.total_bytes(), crc16(test_piece.get_data_start_buffer(), test_piece.total_bytes()), &serial, &complete);
             THEN("an RX buffer overflow error is returned") {
                 REQUIRE(status == ACK_STATUS_RX_BUFFER_OVERFLOW);
             }
@@ -185,7 +187,7 @@ SCENARIO("test image receiver", "[image_receiver]") {
             {
                 uint16_t bytes_to_send = min<uint16_t>(rx_buffer_size, total_bytes_to_send - bytes_sent);
                 bool complete;
-                REQUIRE(receiver.handle_image_data(bytes_to_send, 0, &serial, &complete) == ACK_STATUS_SUCCESS);
+                REQUIRE(receiver.handle_image_data(bytes_to_send, crc16(test_piece.get_data_start_buffer() + bytes_sent, bytes_to_send), &serial, &complete) == ACK_STATUS_SUCCESS);
 
                 bytes_sent += bytes_to_send;
                 REQUIRE((bytes_sent <= total_bytes_to_send));

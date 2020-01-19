@@ -1,6 +1,34 @@
 import serial
 from imageburner.burnerprotocol import InquiryReq, StartPieceReq, ImageDataReq
 
+POLY=0x8408
+
+def cacl_crc16(data_p):
+    crc = 0xffff
+
+    if len(data_p) == 0:
+        return ~crc
+
+    bytes_to_calculate = len(data_p)
+    data_idx = 0
+    while bytes_to_calculate > 0:
+        data = 0xff & data_p[data_idx]
+        data_idx += 1
+        for i in range(8):
+            if ((crc & 0x0001) ^ (data & 0x0001)) != 0:
+                crc = (crc >> 1) ^ POLY
+            else:
+                crc >>= 1
+            data >>= 1
+        bytes_to_calculate -= 1
+
+    crc = ~crc
+    data = crc
+    crc = (crc << 8) | (data >> 8 & 0xff)
+
+    return 0xFFFF & crc
+
+
 def dump_bytes(bytes):
     st = ''
     for b in bytes:
@@ -45,7 +73,9 @@ class BurnerConnection:
             # print('sending %u entries' % entries_to_send)
             img_piece = img_data[entries_sent:entries_sent + entries_to_send]
             # print('Sending %s' % dump_bytes(img_piece))
-            img_data_req = ImageDataReq(self._serial, len(img_piece), 0)   # TODO: set CRC
+            crc = cacl_crc16(img_piece)
+            # print('sending crc of %u' % crc)
+            img_data_req = ImageDataReq(self._serial, len(img_piece), crc)   # TODO: set CRC
             ack = img_data_req.send(img_piece)
             if ack.status != 0:
                 raise Exception('Error %u sending image data' % ack.status)

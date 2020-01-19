@@ -15,20 +15,20 @@
 
 #define POLY 0x8408
 
-static uint16_t crc16(const uint8_t *data_p, uint16_t length)
+uint16_t crc16(const uint8_t *data_p, uint16_t length)
 {
     uint16_t i;
-    uint32_t data;
-    uint32_t crc = 0xffff;
+    uint16_t data;
+    uint16_t crc = 0xffff;
 
     if (length == 0)
     {    
-        return static_cast<uint16_t>(~crc);
+        return ~crc;
     }
 
     do
     {
-        for (i = 0, data = static_cast<int32_t>(0xff & *data_p++);
+        for (i = 0, data = 0xff & *data_p++;
              i < 8;
              i++, data >>= 1)
         {
@@ -48,7 +48,7 @@ static uint16_t crc16(const uint8_t *data_p, uint16_t length)
     data = crc;
     crc = (crc << 8) | (data >> 8 & 0xff);
 
-    return static_cast<uint16_t>(crc);
+    return crc;
 }
 
 
@@ -166,14 +166,15 @@ AckStatus ImageReceiver::handle_image_data(uint16_t num_bytes,
 
     _piece.report_bytes_added_to_rx_buffer(num_bytes);
 
-/*  Test CRC after testing the transfer code.
+    // Test CRC after testing the transfer code.
     // 4. Verify the image data CRC
     uint16_t crc = crc16(rx_buffer, num_bytes);
+    // printf("calculated CRC of %u. Got %u\n", crc, image_data_crc);
     if (crc != image_data_crc)
     {
         return ACK_STATUS_BAD_CRC;
     }
-*/    
+    
     // 5. Send the image piece to the image router
     if (_piece.is_complete())
     {

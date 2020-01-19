@@ -17,7 +17,7 @@ SCENARIO("test burner script through image burner", "[integration]") {
 
     string output = exec(string("../burn_image.py -o testme.pgm ") + get_serial_port_name() + " ../test.bmp");
 
-    // printf("script output: \"%s\"\n", output.c_str());
+    printf("script output: \"%s\"\n", output.c_str());
 
     printf("\nKilling serial port to unblock test thread. Ignore I/O errors.\n");
     shutdown_serial_port();

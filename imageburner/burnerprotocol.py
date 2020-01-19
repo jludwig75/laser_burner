@@ -20,7 +20,7 @@ ACK_SATUS_NOT_IMPLEMENTED = 5
 ACK_STATUS_IO_ERROR = 6
 
 def U16_HI_BYTE(x):
-    return x >> 16
+    return x >> 8
 
 def U16_LO_BYTE(x):
     return x & 0xFF
@@ -136,6 +136,13 @@ class ImageDataAck(Ack):
             raise Exception('Expected start piece op (%u), got op %u' % (IMG_DATA_ACK_OP, op))
         bytes = self._serial.read(1)
         self.complete = False if bytes[0] == 0 else True
+
+def dump_bytes(bytes):
+    st = ''
+    for b in bytes:
+        st += hex(int(b)) + ','
+    return st
+
 
 class ImageDataReq:
     def __init__(self, serial, number_of_bytes, image_data_crc):
