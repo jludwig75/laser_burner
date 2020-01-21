@@ -222,6 +222,28 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
         REQUIRE(test_handler.start_piece_data().height() == 11);
     }
 
+    SECTION("test start piece request with out-of-bounds parameters") {
+        // prove that it was not already set to the values expected after running the test
+        string command = string("../exercise_protocol.py -o START -p '{\"x\": 2000, \"y\": 2000, \"width\": 1200, \"height\": 1200}' ") + get_serial_port_name();
+
+        string output = exec(command);
+
+        auto lines = split(output);
+        REQUIRE(lines.size() == 1);
+        REQUIRE_THAT(lines[0], Catch::StartsWith("ERROR"));
+    }
+
+    SECTION("test start piece request with zero size and width") {
+        // prove that it was not already set to the values expected after running the test
+        string command = string("../exercise_protocol.py -o START -p '{\"x\": 0, \"y\": 0, \"width\": 0, \"height\": 0}' ") + get_serial_port_name();
+
+        string output = exec(command);
+
+        auto lines = split(output);
+        REQUIRE(lines.size() == 1);
+        REQUIRE_THAT(lines[0], Catch::StartsWith("ERROR"));
+    }
+
     SECTION("test image data request") {
         // prove that these are set to there uninitialized values
         REQUIRE(test_handler.image_data_data().number_of_bytes() == UINT16_MAX);
