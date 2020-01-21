@@ -146,11 +146,6 @@ target_include_directories(make-gradient-image PUBLIC
                 )
 target_compile_definitions(make-gradient-image PRIVATE
                 cimg_display=0)
-# target_link_libraries(burner_script_to_image_burner_test
-#                         unittest
-#                         pthread
-#                         Catch2::Catch2)
-# add_test(burner_script_to_image_burner_test burner_script_to_image_burner_test)
 
 
 # laser_burner_sim_test
