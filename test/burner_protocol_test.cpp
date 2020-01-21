@@ -190,6 +190,16 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
         REQUIRE(lines[2] == string("MAX_DIM=") + to_string(TEST_MAX_DIM));
     }
 
+    SECTION("test inquiry request with bad magic") {
+        string command = string("../exercise_protocol.py -o INQUIRY -B ") + get_serial_port_name();
+
+        string output = exec(command);
+
+        auto lines = split(output);
+        REQUIRE(lines.size() == 1);
+        REQUIRE_THAT(lines[0], Catch::StartsWith("ERROR"));
+    }
+
     SECTION("test start piece request") {
         // prove that it was not already set to the values expected after running the test
         REQUIRE(test_handler.start_piece_data().x() != 45);

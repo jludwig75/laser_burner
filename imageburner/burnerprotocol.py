@@ -50,9 +50,10 @@ class UnknownAck(Ack):
             raise Exception('Expected inquiry op (%u), got op %u' % (INQUIRY_ACK_OP, op))
 
 class UnknownReq:
-    def __init__(self, serial, opcode):
+    def __init__(self, serial, opcode, send_bad_magic=False):
         self._serial = serial
         self._opcode = opcode
+        self._send_bad_magic = send_bad_magic
 
     def send(self):
         self._serial.write(self._req_bytes)
@@ -64,7 +65,7 @@ class UnknownReq:
     def _req_bytes(self):
         # encode in net order (big endian)
         bytes = bytearray(4)
-        bytes[0] = BURNER_MAGIC[0]
+        bytes[0] = BURNER_MAGIC[0] if not self._send_bad_magic else 0xEE
         bytes[1] = BURNER_MAGIC[1]
         bytes[2] = U16_HI_BYTE(self._opcode)
         bytes[3] = U16_LO_BYTE(self._opcode)
@@ -86,8 +87,9 @@ class InquiryAck(Ack):
         self.max_dim = (bytes[2] << 8) | bytes[3]
 
 class InquiryReq:
-    def __init__(self, serial):
+    def __init__(self, serial, send_bad_magic=False):
         self._serial = serial
+        self._send_bad_magic = send_bad_magic
 
     def send(self):
         self._serial.write(self._req_bytes)
@@ -99,7 +101,7 @@ class InquiryReq:
     def _req_bytes(self):
         # encode in net order (big endian)
         bytes = bytearray(4)
-        bytes[0] = BURNER_MAGIC[0]
+        bytes[0] = BURNER_MAGIC[0] if not self._send_bad_magic else 0xEE
         bytes[1] = BURNER_MAGIC[1]
         bytes[2] = 0
         bytes[3] = INQUIRY_REQ_OP
@@ -118,12 +120,13 @@ class StartPieceAck(Ack):
             raise Exception('Expected start piece op (%u), got op %u' % (START_PIECE_ACK_OP, op))
 
 class StartPieceReq:
-    def __init__(self, serial, start_x, start_y, width, height):
+    def __init__(self, serial, start_x, start_y, width, height, send_bad_magic=False):
         self._serial = serial
         self.start_x = start_x
         self.start_y = start_y
         self.width = width
         self.height = height
+        self._send_bad_magic = send_bad_magic
 
     def send(self):
         self._serial.write(self._req_bytes)
@@ -135,7 +138,7 @@ class StartPieceReq:
     def _req_bytes(self):
         # encode in net order (big endian)
         bytes = bytearray(12)
-        bytes[0] = BURNER_MAGIC[0]
+        bytes[0] = BURNER_MAGIC[0] if not self._send_bad_magic else 0xEE
         bytes[1] = BURNER_MAGIC[1]
 
         # network (big endian) byte order
@@ -178,10 +181,11 @@ def dump_bytes(bytes):
 
 
 class ImageDataReq:
-    def __init__(self, serial, number_of_bytes, image_data_crc):
+    def __init__(self, serial, number_of_bytes, image_data_crc, send_bad_magic=False):
         self._serial = serial
         self.number_of_bytes = number_of_bytes
         self.image_data_crc = image_data_crc
+        self._send_bad_magic = send_bad_magic
 
     def send(self, image_data):
         self._serial.write(self._req_bytes)
@@ -194,7 +198,7 @@ class ImageDataReq:
     def _req_bytes(self):
         # encode in net order (big endian)
         bytes = bytearray(8)
-        bytes[0] = BURNER_MAGIC[0]
+        bytes[0] = BURNER_MAGIC[0] if not self._send_bad_magic else 0xEE
         bytes[1] = BURNER_MAGIC[1]
 
         # network (big endian) byte order
