@@ -166,6 +166,18 @@ TEST_CASE("test laser burner protocol", "[protocol]") {
 
     thread handler_thread(run_handler, ref(protocol_handler));
 
+    SECTION("test unknown opdoce") {
+        string command = string("../exercise_protocol.py -o 99 ") + get_serial_port_name();
+
+        string output = exec(command);
+
+        printf("script output = \"%s\"\n", output.c_str());
+
+        auto lines = split(output);
+        REQUIRE(lines.size() == 1);
+        REQUIRE_THAT(lines[0], Catch::StartsWith("ERROR"));
+    }
+
     SECTION("test inquiry request") {
         string command = string("../exercise_protocol.py -o INQUIRY ") + get_serial_port_name();
 

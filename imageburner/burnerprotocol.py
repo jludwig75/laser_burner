@@ -37,6 +37,39 @@ class Ack:
         self.status = (bytes[4] << 8) | bytes[5]
         return (self.op, self.status)
 
+class UnknownAck(Ack):
+    def __init__(self, serial):
+        Ack.__init__(self, serial)
+        self._serial = serial
+
+    def receive(self):
+        op, status = Ack.receive(self)
+        if status != ACK_SATUS_SUCCESS:
+            raise Exception('Failed inquiry ACK: error status %u' % status)
+        if op != INQUIRY_ACK_OP:
+            raise Exception('Expected inquiry op (%u), got op %u' % (INQUIRY_ACK_OP, op))
+
+class UnknownReq:
+    def __init__(self, serial, opcode):
+        self._serial = serial
+        self._opcode = opcode
+
+    def send(self):
+        self._serial.write(self._req_bytes)
+        ack = UnknownAck(self._serial)
+        ack.receive()
+        return ack
+
+    @property
+    def _req_bytes(self):
+        # encode in net order (big endian)
+        bytes = bytearray(4)
+        bytes[0] = BURNER_MAGIC[0]
+        bytes[1] = BURNER_MAGIC[1]
+        bytes[2] = U16_HI_BYTE(self._opcode)
+        bytes[3] = U16_LO_BYTE(self._opcode)
+        return bytes
+
 class InquiryAck(Ack):
     def __init__(self, serial):
         Ack.__init__(self, serial)

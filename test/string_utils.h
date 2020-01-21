@@ -13,7 +13,11 @@ std::vector<std::string> split(const std::string &str)
     while(ss)
     {
         std::string line;
-        ss >> line;
+        std::getline(ss, line);
+        if (!ss)
+        {
+            break;
+        }
         if (line[line.length() - 1] == '\n')
         {
             line.resize(line.length() - 1);

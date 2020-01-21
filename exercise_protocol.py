@@ -3,7 +3,7 @@ import sys
 import serial
 import argparse
 import json
-from imageburner.burnerprotocol import InquiryReq, StartPieceReq, ImageDataReq
+from imageburner.burnerprotocol import InquiryReq, StartPieceReq, ImageDataReq, UnknownReq
 
 def send_inquiry(serial_port, baud_rate):
     serial_con = serial.Serial(serial_port, baud_rate)
@@ -45,6 +45,19 @@ def send_image_data(serial_port, baud_rate, params):
     except Exception as e:
         print('ERROR: %s' % str(e))
 
+def send_unknown_op_code(serial_port, baud_rate, opcode):
+    # print('sending unknow opcode %u' % opcode)
+    serial_con = serial.Serial(serial_port, baud_rate)
+    reg_request = UnknownReq(serial_con, opcode)
+    try:
+        ack = reg_request.send()
+        if ack.status != 0:
+            print('ERROR: %u' % ack.status)
+        else:
+            print('SUCCESS')
+    except Exception as e:
+        print('ERROR: %s' % str(e))
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Exercises the burner protocol form the controller side')
 
@@ -66,4 +79,9 @@ if __name__ == '__main__':
     elif args.opcode == 'IMGDATA':
         send_image_data(args.serial_port, args.baud_rate, json.loads(args.params))
     else:
-        print('opcode %s is not supported' % args.opcode)
+        try:
+            opcode = int(args.opcode)
+        except:
+            print('ERROR: opcode %s is not supported' % args.opcode)
+            sys.exit(-1)
+        send_unknown_op_code(args.serial_port, args.baud_rate, opcode)
