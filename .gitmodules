@@ -1,7 +1,7 @@
-[submodule "CImg"]
-	path = CImg
-	url = https://framagit.org/dtschump/CImg.git
 [submodule "Catch2"]
 	path = Catch2
 	url = https://github.com/catchorg/Catch2.git
 	branch = master
+[submodule "CImg"]
+	path = CImg
+	url = https://github.com/dtschump/CImg.git
